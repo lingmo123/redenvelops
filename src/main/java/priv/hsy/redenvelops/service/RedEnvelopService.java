@@ -15,5 +15,5 @@ public interface RedEnvelopService {
 
     String updateenvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
 
-    String redmoneyinit (int count, double totalmoney);
+    String redmoneyinit (int rid, int count, double totalmoney);
 }

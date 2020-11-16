@@ -24,7 +24,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     @Override
     public int insert(RedEnvelop redEnvelop) {
         this.baseMapper.insert(redEnvelop);
-        redmoneyinit(redEnvelop.getCount(),redEnvelop.getTotalmoney());
+        redmoneyinit(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalmoney());
         return 1;
     }
 
@@ -44,6 +44,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
 
         return this.baseMapper.selectOne(wrapper);
     }
+
     //更新红包数据
     @Override
     public String updateenvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize) {
@@ -55,21 +56,22 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
 
     /**
      * 将红包金额以list形式存入redis
-     * @param count 红包数量
-     * @param totalmoney 红包金额
      *
+     * @param count      红包数量
+     * @param totalmoney 红包金额
      */
     @Override
-    public String redmoneyinit(int count, double totalmoney) {
-        List<Double> redmoneylist= new ArrayList<>();
-        while(count>0){
+    public String redmoneyinit(int rid, int count, double totalmoney) {
+        String key = rid+"redmoneylist";
+        List<Double> redmoneylist = new ArrayList<>();
+        while (count > 0) {
             double result = GetMoney.getRandomMoney(count, totalmoney);
             redmoneylist.add(result);
-            redisTemplate.opsForList().rightPush("redmoney", result);
+            redisTemplate.opsForList().rightPush(key, result);
             totalmoney -= result;
             count--;
         }
-        log.info("redmoneylist = {}",redmoneylist);
+        log.info("redmoneylist = {}", key);
         return null;
     }
 }

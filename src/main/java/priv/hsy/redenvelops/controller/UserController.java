@@ -14,6 +14,7 @@ import priv.hsy.redenvelops.service.RedInfoService;
 import priv.hsy.redenvelops.service.UserService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
+import java.security.Key;
 import java.util.List;
 
 @RestController
@@ -79,10 +80,12 @@ public class UserController {
 
         RedEnvelop redEnvelop = new RedEnvelop();
         redEnvelop.setCount(redInfo.getCount());
-        redEnvelop.setRestcount(redInfo.getCount());//设置剩余红包个数
+        //设置剩余红包个数
+        redEnvelop.setRestcount(redInfo.getCount());
         redEnvelop.setRid(redInfo.getRid());
         redEnvelop.setTotalmoney(redInfo.getTotalmoney());
-        redEnvelop.setRestmoney(redInfo.getTotalmoney());//设置剩余金额
+        //设置剩余金额
+        redEnvelop.setRestmoney(redInfo.getTotalmoney());
         redEnvelop.setSendid(redInfo.getSendid());
         redEnvelop.setStatus(true);
         redEnvelopService.insert(redEnvelop);
@@ -91,13 +94,13 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/getred")
-    public Result<Object> getred(@RequestParam("rid") Integer rid,@RequestParam("id")Integer id){
+    public Result<Object> getred(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
 
-        QueryWrapper<RedEnvelop> Wrapper = new QueryWrapper<>();
-        Wrapper
+        QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
+        wrapper
                 .eq("rid", rid);
         //获得所抢红包信息
-        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(Wrapper);
+        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(wrapper);
 
         if (redEnvelopcurrent.getStatus().equals(false)) {
 //            return "红包还未开始抢";
@@ -115,11 +118,11 @@ public class UserController {
 //                return "您已经抢过红包了";
                 return ResultUtil.result(ResultEnum.USERGET_NO);
             } else {
-
+                String key = redEnvelopcurrent.getRid()+"redmoneylist";
                 //获得此次红包金额
                 int remainSize = redEnvelopcurrent.getRestcount();
                 Double remainMoney = redEnvelopcurrent.getRestmoney();
-                double money= (double) redisTemplate.boundListOps("redmoney").rightPop();
+                double money = (double) redisTemplate.boundListOps(key).rightPop();
                 log.info("money = ", money);
                 //用户抢到红包更新账户余额
                 userService.updateUserifo(id, money);
@@ -133,17 +136,58 @@ public class UserController {
                 return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
             }
         }
-
     }
 
     @PostMapping(value = "/test")
-    public Result<Object> test(@RequestParam("rid") Integer rid,@RequestParam("id")Integer id) {
+    public Result<Object> test(@RequestParam("rid") Integer rid) {
 
-        QueryWrapper<RedEnvelop> Wrapper = new QueryWrapper<>();
-        Wrapper
+        QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
+        wrapper
                 .eq("rid", rid);
         //获得所抢红包信息
-        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(Wrapper);
+        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(wrapper);
+
+        if (redEnvelopcurrent.getStatus().equals(false)) {
+//            return "红包还未开始抢";
+            return null;
+        } else if (redEnvelopcurrent.getRestcount() < 0) {
+
+//            return "红包已经抢完了";
+            return ResultUtil.result(ResultEnum.REDCOUNT_NO);
+        } else {
+                String key = redEnvelopcurrent.getRid()+"redmoneylist";
+                //获得此次红包金额
+                int remainSize = redEnvelopcurrent.getRestcount();
+                Double remainMoney = redEnvelopcurrent.getRestmoney();
+                try {
+                    double money = (double) redisTemplate.boundListOps(key).rightPop();
+                    log.info("money = {}", money);
+                }
+                catch (Exception e){
+                    return ResultUtil.result(ResultEnum.FAIL);
+                }
+                return ResultUtil.result(ResultEnum.SUCCESS);
+                //用户抢到红包更新账户余额
+//                userService.updateUserifo(id, money);
+                //更新红包数据
+//                remainSize--;
+//                remainMoney -= money;
+//                redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
+//                //更新红包明细
+//                redDetailService.updateRedDetail(redEnvelopcurrent, money, rid,2);
+//                //return 成功抢到红包
+//                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+            }
+    }
+
+    @PostMapping(value = "/test1")
+    public Result<Object> test1(@RequestParam("rid") Integer rid,@RequestParam("id") Integer id) {
+
+        QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
+        wrapper
+                .eq("rid", rid);
+        //获得所抢红包信息
+        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(wrapper);
 
         if (redEnvelopcurrent.getStatus().equals(false)) {
 //            return "红包还未开始抢";
@@ -160,27 +204,29 @@ public class UserController {
             if (redDetailService.selectOne(queryWrapper) != null) {
 //                return "您已经抢过红包了";
                 return ResultUtil.result(ResultEnum.USERGET_NO);
-            } else {
-
+            }else {
+                String key = redEnvelopcurrent.getRid() + "redmoneylist";
                 //获得此次红包金额
                 int remainSize = redEnvelopcurrent.getRestcount();
                 Double remainMoney = redEnvelopcurrent.getRestmoney();
-                double money= (double) redisTemplate.boundListOps("redmoney").rightPop();
-                log.info("money = ", money);
-                //用户抢到红包更新账户余额
-                userService.updateUserifo(id, money);
-                //更新红包数据
-                remainSize--;
-                remainMoney -= money;
-                redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
-                //更新红包明细
-                redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
-                //return 成功抢到红包
-                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+                try {
+                    double money = (double) redisTemplate.boundListOps(key).rightPop();
+                    log.info("money = {}", money);
+                    //用户抢到红包更新账户余额
+                    userService.updateUserifo(id, money);
+                    //更新红包数据
+                    remainSize--;
+                    remainMoney -= money;
+                    redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
+                    //更新红包明细
+                    redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
+                    //return 成功抢到红包
+                    return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+                } catch (Exception e) {
+                    return ResultUtil.result(ResultEnum.REDCOUNT_NO);
+                }
             }
         }
-
     }
-
 }
 
