@@ -14,7 +14,6 @@ import priv.hsy.redenvelops.service.RedInfoService;
 import priv.hsy.redenvelops.service.UserService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
-import java.security.Key;
 import java.util.List;
 
 @RestController
@@ -88,6 +87,7 @@ public class UserController {
         redEnvelop.setRestmoney(redInfo.getTotalmoney());
         redEnvelop.setSendid(redInfo.getSendid());
         redEnvelop.setStatus(true);
+
         redEnvelopService.insert(redEnvelop);
         //return "成功发送红包！"
         return ResultUtil.result(ResultEnum.REDSEND_SUCCESS);

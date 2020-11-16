@@ -9,6 +9,7 @@ import priv.hsy.redenvelops.mapper.RedInfoMapper;
 import priv.hsy.redenvelops.service.RedInfoService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -22,6 +23,8 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
 
     @Override
     public int insert(RedInfo redInfo) {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redInfo.setCreattime(time);
         this.baseMapper.insert(redInfo);
         return 0;
     }

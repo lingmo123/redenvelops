@@ -3,6 +3,8 @@ package priv.hsy.redenvelops.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -66,23 +68,31 @@ public class GetMoney {
         return money;
     }
 
-    public static void main(String[] args) {
-        List<Double> list=new ArrayList<>();
-        int remainSize=10;
-
-        double remainMoney=100;
-        while(remainSize>0){
-                double result = GetMoney.getRandomMoney(remainSize, remainMoney);
-                list.add(result);
-                remainMoney -= result;
-                remainSize--;
-        }
-        double total=0.0;
-        for (double a:list
-             ) {
-            total+=a;
-        }
-        log.info("list={} {} ",list,total);
+    public static void main(String[] args) throws ParseException {
+//        List<Double> list=new ArrayList<>();
+//        int remainSize=10;
+//
+//        double remainMoney=100;
+//        while(remainSize>0){
+//                double result = GetMoney.getRandomMoney(remainSize, remainMoney);
+//                list.add(result);
+//                remainMoney -= result;
+//                remainSize--;
+//        }
+//        double total=0.0;
+//        for (double a:list
+//             ) {
+//            total+=a;
+//        }
+//        log.info("list={} {} ",list,total);
 //        line_cut(100,10);
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+        String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+        java.text.SimpleDateFormat formatter =
+                new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
+        Date Time=formatter.parse(date);
+        log.info(date);
+        log.info(String.valueOf(Time));
     }
 }

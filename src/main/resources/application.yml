@@ -6,7 +6,9 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/RedEnvelop?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/RedEnvelop?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+  jackson:
+    time-zone: GMT+8
 #配置日志，查看执行的sql语句
 mybatis-plus:
   configuration:
