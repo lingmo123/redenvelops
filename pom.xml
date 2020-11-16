@@ -18,6 +18,8 @@
         <java.version>1.8</java.version>
         <spirng-boot.version>2.3.4.RELEASE</spirng-boot.version>
         <mybatis-plus.version>3.1.2</mybatis-plus.version>
+        <springfox-swagger2.version>3.0.0</springfox-swagger2.version>
+
     </properties>
 
     <dependencyManagement>
@@ -65,6 +67,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-swagger2.version}</version>
         </dependency>
 
         <dependency>

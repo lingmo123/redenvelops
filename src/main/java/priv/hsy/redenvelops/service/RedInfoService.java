@@ -1,6 +1,7 @@
 package priv.hsy.redenvelops.service;
 
 import priv.hsy.redenvelops.entity.RedInfo;
+import priv.hsy.redenvelops.entity.Result;
 
 import java.util.List;
 
@@ -10,5 +11,5 @@ public interface RedInfoService {
 
     int insert(RedInfo redInfo);
 
-    String setred(RedInfo redInfo);
+    Result<Object> setred(RedInfo redInfo);
 }

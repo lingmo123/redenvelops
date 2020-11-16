@@ -14,4 +14,6 @@ public interface RedEnvelopService {
     RedEnvelop selectOne(Wrapper<RedEnvelop> wrapper);
 
     String updateenvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
+
+    String redmoneyinit (int count, double totalmoney);
 }

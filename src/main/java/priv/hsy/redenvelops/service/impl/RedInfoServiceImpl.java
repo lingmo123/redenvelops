@@ -3,8 +3,11 @@ package priv.hsy.redenvelops.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import priv.hsy.redenvelops.entity.RedInfo;
+import priv.hsy.redenvelops.entity.Result;
+import priv.hsy.redenvelops.enums.ResultEnum;
 import priv.hsy.redenvelops.mapper.RedInfoMapper;
 import priv.hsy.redenvelops.service.RedInfoService;
+import priv.hsy.redenvelops.utils.ResultUtil;
 
 import java.util.List;
 
@@ -27,8 +30,8 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
      * 将红包信息存入数据库
      */
     @Override
-    public String setred(RedInfo redInfo) {
+    public Result<Object> setred(RedInfo redInfo) {
         insert(redInfo);
-        return "红包设置成功！";
+        return ResultUtil.result(ResultEnum.REDSET_SUCCESS);
     }
 }
