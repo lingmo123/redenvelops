@@ -49,13 +49,15 @@ public class UserController {
         List<RedInfo> redInfoList = redInfoService.select();
         return ResultUtil.result(ResultEnum.SUCCESS, redInfoList);
     }
+
     @GetMapping(value = "/api/getpageredinfo")
     public Result<Object> getPageRedInfo() {
         int page = 1;
-        PageBean pageBean=redInfoService.selectPage(page);
+        PageBean pageBean = redInfoService.selectPage(page);
         log.info("list = [{}]", pageBean.getPageRecode());
-        return ResultUtil.result(ResultEnum.SUCCESS,pageBean);
+        return ResultUtil.result(ResultEnum.SUCCESS, pageBean);
     }
+
     /**
      * 设置红包接口
      *
@@ -88,11 +90,42 @@ public class UserController {
         }
     }
 
+    /**
+     * 编辑已设置的红包
+     *
+     * @param rid 红包ID
+     * @param count 红包数量
+     * @param totalMoney 红包金额
+     * @return 返回状态码和消息提示
+     */
     @PostMapping(value = "/api/updatered")
-    public Result<Object> updateRed(@RequestBody RedInfo redInfo) {
-
-        return null;
+    public Result<Object> updateRed(@RequestParam("rid") Integer rid, @RequestParam("count") Integer count,
+                                    @RequestParam("totalMoney") Double totalMoney) {
+        RedInfo redInfo = redInfoService.selectById(rid);
+        User user = userService.selectById(redInfo.getSendId());
+        if (totalMoney < 0.01) {
+//            return "红包金额最小值为0.01";
+            return ResultUtil.result(ResultEnum.REDMONEY_MIN);
+            //红包数量下限
+        } else if (count < 1) {
+//            return "红包数量最小为1";
+            return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
+            //用户余额是否不足
+        } else if (totalMoney > redInfo.getTotalMoney() + user.getMoney()) {
+//            return "你的余额不足，无法设置红包！";
+            return ResultUtil.result(ResultEnum.USERMONEY_NO);
+        } else {
+            //红包信息更新
+            double restmoney = (totalMoney - redInfo.getTotalMoney()) + user.getMoney();
+            redInfoService.update(redInfo, rid, count, totalMoney);
+            //发红包用户余额更新
+            user.setUid(redInfo.getSendId());
+            user.setMoney(restmoney);
+            userService.updateById(user);
+            return ResultUtil.result(ResultEnum.REDSET_SUCCESS);
+        }
     }
+
     /**
      * 发送红包接口
      *

@@ -18,6 +18,12 @@ import java.util.List;
 @Service
 public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> implements RedInfoService {
 
+
+    @Override
+    public RedInfo selectById(int rid) {
+        return this.baseMapper.selectById(rid);
+    }
+
     @Override
     public List<RedInfo> select() {
         return this.baseMapper.selectList(null);
@@ -59,6 +65,13 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
         return 0;
     }
 
+    @Override
+    public boolean update(RedInfo redInfo, int rid, int count, double totalMoney){
+        redInfo.setCount(count);
+        redInfo.setTotalMoney(totalMoney);
+        this.baseMapper.updateById(redInfo);
+        return true;
+    }
     /**
      * 将红包信息存入数据库
      */
