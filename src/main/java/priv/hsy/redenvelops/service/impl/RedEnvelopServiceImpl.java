@@ -22,21 +22,41 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 发送红包的红包详情存入数据库，并设置每个红包金额
+     * @param redEnvelop 实体类
+     * @return
+     */
     @Override
-    public int insert(RedEnvelop redEnvelop) {
+    public String insert(RedEnvelop redEnvelop) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
         redEnvelop.setSendTime(time);
         this.baseMapper.insert(redEnvelop);
+        try{
         redmoneyinit(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalMoney());
-        return 1;
+        }
+        catch (Exception e){
+            return "redis设置红包列表出错！";
+        }
+        return "success！";
     }
 
+    /**
+     * 更新正在抢的红包数据
+     * @param redEnvelop 实体类
+     * @return
+     */
     @Override
     public boolean updateById(RedEnvelop redEnvelop) {
         this.baseMapper.updateById(redEnvelop);
         return true;
     }
 
+    /**
+     * 查询确定的id的正在抢的红包详情
+     * @param id 红包id
+     * @return
+     */
     @Override
     public RedEnvelop selectById(Integer id) {
         return this.baseMapper.selectById(id);
@@ -45,7 +65,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     /**
      * 数据库查询在抢红包
      *
-     * @param wrapper
+     * @param wrapper 条件语句
      * @return
      */
     @Override
@@ -57,9 +77,9 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     /**
      * 更新红包数据
      *
-     * @param redEnvelop
-     * @param remainMoney
-     * @param remainSize
+     * @param redEnvelop 实体类
+     * @param remainMoney 红包剩余金额
+     * @param remainSize 红包剩余数量
      * @return
      */
     @Override

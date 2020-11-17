@@ -5,7 +5,7 @@ import priv.hsy.redenvelops.entity.RedEnvelop;
 
 public interface RedEnvelopService {
 
-    int insert(RedEnvelop redEnvelop);
+    String insert(RedEnvelop redEnvelop);
 
     boolean updateById(RedEnvelop redEnvelop);
 

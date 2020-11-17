@@ -11,45 +11,52 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class GetMoneyUtil {
 
-    public static void line_cut(int money,int people ) {
-        List<Double> team=new ArrayList<>();
-        List<Double> result=new ArrayList<>();
-        ThreadLocalRandom random=ThreadLocalRandom.current();
+    public static void line_cut(int money, int people) {
+        List<Double> team = new ArrayList<>();
+        List<Double> result = new ArrayList<>();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
 
-        double m=money-1;
-        while(team.size() < people -1) {
+        double m = money - 1;
+        while (team.size() < people - 1) {
             //不让nextDouble 为0
-            double nextDouble = random.nextDouble(m)+1;
-            DecimalFormat df = new DecimalFormat( "0.00" );
+            double nextDouble = random.nextDouble(m) + 1;
+            DecimalFormat df = new DecimalFormat("0.00");
             String s = df.format(nextDouble);
             nextDouble = Double.parseDouble(s);
 
-            if(!team.contains(nextDouble)) {
+            if (!team.contains(nextDouble)) {
                 team.add(nextDouble);
 //                log.info("nextDouble="+nextDouble);
                 System.out.println(nextDouble);
             }
         }
         Collections.sort(team);
-        System.out.println("team="+team);
+        System.out.println("team=" + team);
 
         for (int i = 0; i < team.size(); i++) {
-            if(i== 0) {
+            if (i == 0) {
                 result.add(team.get(i));
-            }else {
-                result.add(team.get(i)-team.get(i-1));
-                if(i==team.size()-1) {
-                    result.add(money-team.get(i));
+            } else {
+                result.add(team.get(i) - team.get(i - 1));
+                if (i == team.size() - 1) {
+                    result.add(money - team.get(i));
                 }
             }
         }
-        System.out.println("result="+result);
+        System.out.println("result=" + result);
         //验证分割后的数是否是输入的总金额
         Optional<Double> r = result.stream().reduce(Double::sum);
-        System.out.println("r.get()="+r.get());
+        System.out.println("r.get()=" + r.get());
     }
-    //二倍均值法（公平版）
-    public static double getRandomMoney(int remainSize,double remainMoney) {
+
+    /**
+     * 二倍均值法（公平版）
+     *
+     * @param remainSize  剩余红包数量
+     * @param remainMoney 剩余红包金额
+     * @return
+     */
+    public static double getRandomMoney(int remainSize, double remainMoney) {
         // remainSize 剩余的红包数量
         // remainMoney 剩余的钱
         if (remainSize == 1) {
@@ -64,7 +71,7 @@ public class GetMoneyUtil {
         money = money <= min ? 0.01 : money;
         money = Math.floor(money * 100) / 100;
         remainSize--;
-        remainMoney-=money;
+        remainMoney -= money;
         return money;
     }
 
@@ -90,8 +97,8 @@ public class GetMoneyUtil {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
         String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
         java.text.SimpleDateFormat formatter =
-                new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
-        Date Time=formatter.parse(date);
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date Time = formatter.parse(date);
         log.info(date);
         log.info(String.valueOf(Time));
     }

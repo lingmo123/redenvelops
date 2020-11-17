@@ -18,17 +18,29 @@ import java.util.List;
 @Service
 public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> implements RedInfoService {
 
-
+    /**
+     * 获取确定id的红包详情
+     * @param rid
+     * @return
+     */
     @Override
     public RedInfo selectById(int rid) {
         return this.baseMapper.selectById(rid);
     }
-
+    /**
+     * 获取所有的红包详情
+     * @return
+     */
     @Override
     public List<RedInfo> select() {
         return this.baseMapper.selectList(null);
     }
 
+    /**
+     * 分页查询所有红包详情
+     * @param page
+     * @return
+     */
     @Override
     public PageBean selectPage(int page) {
         PageBean pageBean = new PageBean();
@@ -57,6 +69,11 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
         return pageBean;
     }
 
+    /**
+     * 插入红包信息至数据库
+     * @param redInfo
+     * @return
+     */
     @Override
     public int insert(RedInfo redInfo) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -65,6 +82,14 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
         return 0;
     }
 
+    /**
+     * 更新已经设置的红包信息
+     * @param redInfo
+     * @param rid 红包id
+     * @param count 更新后的红包数量
+     * @param totalMoney 更新后的红包总金额
+     * @return
+     */
     @Override
     public boolean update(RedInfo redInfo, int rid, int count, double totalMoney){
         redInfo.setCount(count);

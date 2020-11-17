@@ -10,10 +10,13 @@ import priv.hsy.redenvelops.service.RedDetailService;
 
 import java.sql.Timestamp;
 
-
 @Service
 public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail> implements RedDetailService {
-
+    /**
+     * 查询数据库中此id是否抢过红包
+     * @param wrapper 条件语句
+     * @return 查询结果
+     */
     @Override
     public RedDetail selectOne(Wrapper<RedDetail> wrapper) {
 
@@ -23,24 +26,24 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
     /**
      * 抢红包信息插入数据库
      *
-     * @param redDetail
+     * @param redDetail 实体类
      * @return
      */
     @Override
-    public int insert(RedDetail redDetail) {
+    public String insert(RedDetail redDetail) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
         redDetail.setGetTime(time);
         this.baseMapper.insert(redDetail);
-        return 1;
+        return "success";
     }
 
     /**
      * 更新抢红包明细
      *
-     * @param redEnvelop
-     * @param money
-     * @param rid
-     * @param id
+     * @param redEnvelop 实体类
+     * @param money 抢到的红包金额
+     * @param rid 所抢红包id
+     * @param id 用户id
      * @return
      */
     @Override
