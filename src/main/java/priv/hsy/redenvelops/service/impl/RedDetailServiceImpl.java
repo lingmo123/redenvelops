@@ -18,18 +18,33 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
         return this.baseMapper.selectOne(wrapper);
     }
 
+    /**
+     * 抢红包信息插入数据库
+     *
+     * @param redDetail
+     * @return
+     */
     @Override
     public int insert(RedDetail redDetail) {
         this.baseMapper.insert(redDetail);
         return 1;
     }
 
+    /**
+     * 更新抢红包明细
+     *
+     * @param redEnvelop
+     * @param money
+     * @param rid
+     * @param id
+     * @return
+     */
     @Override
     public String updateRedDetail(RedEnvelop redEnvelop, double money, int rid, int id) {
         RedDetail redDetail = new RedDetail();
         redDetail.setRid(redEnvelop.getRid());
-        redDetail.setGetmoney(money);
-        redDetail.setReceiveid(id);
+        redDetail.setGetMoney(money);
+        redDetail.setReceiveId(id);
         insert(redDetail);
         return "更新红包明细成功";
     }

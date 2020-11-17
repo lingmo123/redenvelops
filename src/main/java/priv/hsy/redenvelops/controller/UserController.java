@@ -2,6 +2,7 @@ package priv.hsy.redenvelops.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,17 +33,10 @@ public class UserController {
     private RedDetailService redDetailService;
 
     @GetMapping(value = "/getuser")
-    public List<User> getuser() {
+    public List<User> getUser() {
         List<User> userList = userService.selectAll();
         log.info("userList = [{}]", userList);
         return userList;
-    }
-
-    @GetMapping(value = "/api/getredinfo1")
-    public List<RedInfo> getredinfo1() {
-        List<RedInfo> redinfoList = redInfoService.selectAll();
-        log.info("userList = [{}]", redinfoList);
-        return redinfoList;
     }
 
     /**
@@ -51,22 +45,29 @@ public class UserController {
      * @return 返回状态码，消息提示以及设置的红包详情
      */
     @GetMapping(value = "/api/getredinfo")
-    public Result<Object> getredinfo() {
-
-        return redInfoService.select();
+    public Result<Object> getRedInfo() {
+        List<RedInfo> redInfoList = redInfoService.select();
+        return ResultUtil.result(ResultEnum.SUCCESS, redInfoList);
     }
-
+    @GetMapping(value = "/api/getpageredinfo")
+    public Result<Object> getPageRedInfo() {
+        int page = 1;
+        PageBean pageBean=redInfoService.selectPage(page);
+        log.info("list = [{}]", pageBean.getPageRecode());
+        return ResultUtil.result(ResultEnum.SUCCESS,pageBean);
+    }
     /**
      * 设置红包接口
+     *
      * @param redInfo 获取前端form表信息
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/setred")
-    public Result<Object> setred(@RequestBody RedInfo redInfo) {
-        User user = userService.selectById(redInfo.getSendid());
+    public Result<Object> setRed(@RequestBody RedInfo redInfo) {
+        User user = userService.selectById(redInfo.getSendId());
         double money = user.getMoney();
         //红包金额下限
-        if (redInfo.getTotalmoney() < 0.01) {
+        if (redInfo.getTotalMoney() < 0.01) {
 //            return "红包金额最小值为0.01";
             return ResultUtil.result(ResultEnum.REDMONEY_MIN);
             //红包数量下限
@@ -74,36 +75,42 @@ public class UserController {
 //            return "红包数量最小为1";
             return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
             //用户余额是否不足
-        } else if (money < redInfo.getTotalmoney()) {
+        } else if (money < redInfo.getTotalMoney()) {
 //            return "你的余额不足，无法设置红包，请加班挣钱！";
             return ResultUtil.result(ResultEnum.USERMONEY_NO);
         } else {//发红包用户余额更新
-            double restmoney = money - redInfo.getTotalmoney();
+            double restmoney = money - redInfo.getTotalMoney();
             User user1 = new User();
             user1.setUid(1);
             user1.setMoney(restmoney);
             userService.updateById(user1);
-            return redInfoService.setred(redInfo);
+            return redInfoService.setRed(redInfo);
         }
     }
 
+    @PostMapping(value = "/api/updatered")
+    public Result<Object> updateRed(@RequestBody RedInfo redInfo) {
+
+        return null;
+    }
     /**
      * 发送红包接口
+     *
      * @param redInfo 获取前端红包信息
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/sendred")
-    public Result<Object> sendred(@RequestBody RedInfo redInfo) {
+    public Result<Object> sendRed(@RequestBody RedInfo redInfo) {
 
         RedEnvelop redEnvelop = new RedEnvelop();
         redEnvelop.setCount(redInfo.getCount());
         //设置剩余红包个数
-        redEnvelop.setRestcount(redInfo.getCount());
+        redEnvelop.setRestCount(redInfo.getCount());
         redEnvelop.setRid(redInfo.getRid());
-        redEnvelop.setTotalmoney(redInfo.getTotalmoney());
+        redEnvelop.setTotalMoney(redInfo.getTotalMoney());
         //设置剩余金额
-        redEnvelop.setRestmoney(redInfo.getTotalmoney());
-        redEnvelop.setSendid(redInfo.getSendid());
+        redEnvelop.setRestMoney(redInfo.getTotalMoney());
+        redEnvelop.setSendId(redInfo.getSendId());
         redEnvelop.setStatus(true);
 
         redEnvelopService.insert(redEnvelop);
@@ -113,12 +120,13 @@ public class UserController {
 
     /**
      * 抢红包接口
+     *
      * @param rid 获取前端红包id
-     * @param id 获取前端抢红包用户id
+     * @param id  获取前端抢红包用户id
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/getred")
-    public Result<Object> getred(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
+    public Result<Object> getRed(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
 
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
         wrapper
@@ -129,7 +137,7 @@ public class UserController {
         if (redEnvelopcurrent.getStatus().equals(false)) {
 //            return "红包还未开始抢";
             return null;
-        } else if (redEnvelopcurrent.getRestcount() < 0) {
+        } else if (redEnvelopcurrent.getRestCount() < 0) {
 
 //            return "红包已经抢完了";
             return ResultUtil.result(ResultEnum.REDCOUNT_NO);
@@ -144,8 +152,8 @@ public class UserController {
             } else {
                 String key = redEnvelopcurrent.getRid() + "redmoneylist";
                 //获得此次红包金额
-                int remainSize = redEnvelopcurrent.getRestcount();
-                Double remainMoney = redEnvelopcurrent.getRestmoney();
+                int remainSize = redEnvelopcurrent.getRestCount();
+                Double remainMoney = redEnvelopcurrent.getRestMoney();
                 double money = (double) redisTemplate.boundListOps(key).rightPop();
                 log.info("money = ", money);
                 //用户抢到红包更新账户余额
@@ -153,7 +161,7 @@ public class UserController {
                 //更新红包数据
                 remainSize--;
                 remainMoney -= money;
-                redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
+                redEnvelopService.updateEnvelop(redEnvelopcurrent, remainMoney, remainSize);
                 //更新红包明细
                 redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
                 //return 成功抢到红包
@@ -174,15 +182,15 @@ public class UserController {
         if (redEnvelopcurrent.getStatus().equals(false)) {
 //            return "红包还未开始抢";
             return null;
-        } else if (redEnvelopcurrent.getRestcount() < 0) {
+        } else if (redEnvelopcurrent.getRestCount() < 0) {
 
 //            return "红包已经抢完了";
             return ResultUtil.result(ResultEnum.REDCOUNT_NO);
         } else {
             String key = redEnvelopcurrent.getRid() + "redmoneylist";
             //获得此次红包金额
-            int remainSize = redEnvelopcurrent.getRestcount();
-            Double remainMoney = redEnvelopcurrent.getRestmoney();
+            int remainSize = redEnvelopcurrent.getRestCount();
+            Double remainMoney = redEnvelopcurrent.getRestMoney();
             try {
                 double money = (double) redisTemplate.boundListOps(key).rightPop();
                 log.info("money = {}", money);
@@ -195,7 +203,7 @@ public class UserController {
             //更新红包数据
 //                remainSize--;
 //                remainMoney -= money;
-//                redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
+//                redEnvelopService.updateEnvelop(redEnvelopcurrent, remainMoney, remainSize);
 //                //更新红包明细
 //                redDetailService.updateRedDetail(redEnvelopcurrent, money, rid,2);
 //                //return 成功抢到红包
@@ -215,7 +223,7 @@ public class UserController {
         if (redEnvelopcurrent.getStatus().equals(false)) {
 //            return "红包还未开始抢";
             return null;
-        } else if (redEnvelopcurrent.getRestcount() < 0) {
+        } else if (redEnvelopcurrent.getRestCount() < 0) {
 
 //            return "红包已经抢完了";
             return ResultUtil.result(ResultEnum.REDCOUNT_NO);
@@ -230,8 +238,8 @@ public class UserController {
             } else {
                 String key = redEnvelopcurrent.getRid() + "redmoneylist";
                 //获得此次红包金额
-                int remainSize = redEnvelopcurrent.getRestcount();
-                Double remainMoney = redEnvelopcurrent.getRestmoney();
+                int remainSize = redEnvelopcurrent.getRestCount();
+                Double remainMoney = redEnvelopcurrent.getRestMoney();
                 try {
                     double money = (double) redisTemplate.boundListOps(key).rightPop();
                     log.info("money = {}", money);
@@ -240,7 +248,7 @@ public class UserController {
                     //更新红包数据
                     remainSize--;
                     remainMoney -= money;
-                    redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
+                    redEnvelopService.updateEnvelop(redEnvelopcurrent, remainMoney, remainSize);
                     //更新红包明细
                     redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
                     //return 成功抢到红包

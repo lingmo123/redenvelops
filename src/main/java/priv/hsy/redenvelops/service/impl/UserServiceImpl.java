@@ -35,7 +35,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return 0;
     }
 
-    //用户抢到红包更新账户余额
+    /**
+     * 用户抢到红包更新账户余额
+     *
+     * @param id
+     * @param money
+     * @return
+     */
     @Override
     public String updateUserifo(int id, double money) {
         User user = selectById(id);

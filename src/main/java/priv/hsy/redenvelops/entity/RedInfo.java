@@ -3,23 +3,25 @@ package priv.hsy.redenvelops.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class RedInfo {
     @TableId(type = IdType.AUTO)
     private Integer rid;
-    private Double totalmoney;
+    private Double totalMoney;
     private Integer count;
     private Boolean status;
-    private Integer sendid;
-    private Timestamp creattime;
+    private Integer sendId;
+    private Timestamp createTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    public Timestamp getCreattime() {
-        return creattime;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 }

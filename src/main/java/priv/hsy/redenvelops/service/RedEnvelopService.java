@@ -13,7 +13,7 @@ public interface RedEnvelopService {
 
     RedEnvelop selectOne(Wrapper<RedEnvelop> wrapper);
 
-    String updateenvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
+    String updateEnvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
 
-    String redmoneyinit (int rid, int count, double totalmoney);
+    String redmoneyinit(int rid, int count, double totalmoney);
 }

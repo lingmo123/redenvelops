@@ -1,7 +1,6 @@
 package priv.hsy.redenvelops.utils;
 
 
-
 import priv.hsy.redenvelops.entity.Result;
 import priv.hsy.redenvelops.enums.ResultEnum;
 

@@ -24,7 +24,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     @Override
     public int insert(RedEnvelop redEnvelop) {
         this.baseMapper.insert(redEnvelop);
-        redmoneyinit(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalmoney());
+        redmoneyinit(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalMoney());
         return 1;
     }
 
@@ -39,17 +39,30 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return this.baseMapper.selectById(id);
     }
 
+    /**
+     * 数据库查询在抢红包
+     *
+     * @param wrapper
+     * @return
+     */
     @Override
     public RedEnvelop selectOne(Wrapper<RedEnvelop> wrapper) {
 
         return this.baseMapper.selectOne(wrapper);
     }
 
-    //更新红包数据
+    /**
+     * 更新红包数据
+     *
+     * @param redEnvelop
+     * @param remainMoney
+     * @param remainSize
+     * @return
+     */
     @Override
-    public String updateenvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize) {
-        redEnvelop.setRestmoney(remainMoney);
-        redEnvelop.setRestcount(remainSize);
+    public String updateEnvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize) {
+        redEnvelop.setRestMoney(remainMoney);
+        redEnvelop.setRestCount(remainSize);
         updateById(redEnvelop);
         return "更新成功";
     }
@@ -62,7 +75,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      */
     @Override
     public String redmoneyinit(int rid, int count, double totalmoney) {
-        String key = rid+"redmoneylist";
+        String key = rid + "redmoneylist";
         List<Double> redmoneylist = new ArrayList<>();
         while (count > 0) {
             double result = GetMoneyUtil.getRandomMoney(count, totalmoney);
