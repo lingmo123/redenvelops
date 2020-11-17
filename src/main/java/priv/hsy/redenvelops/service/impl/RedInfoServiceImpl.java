@@ -22,6 +22,13 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
     }
 
     @Override
+    public Result<Object> select() {
+        List<RedInfo> redInfoList = this.baseMapper.selectList(null);
+        return ResultUtil.result(ResultEnum.SUCCESS,redInfoList);
+
+    }
+
+    @Override
     public int insert(RedInfo redInfo) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
         redInfo.setCreattime(time);

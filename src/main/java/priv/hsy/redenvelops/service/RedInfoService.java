@@ -9,7 +9,11 @@ public interface RedInfoService {
 
     List<RedInfo> selectAll();
 
+    Result<Object> select();
+
     int insert(RedInfo redInfo);
 
     Result<Object> setred(RedInfo redInfo);
+
+
 }

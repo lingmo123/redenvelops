@@ -38,15 +38,28 @@ public class UserController {
         return userList;
     }
 
-    @GetMapping(value = "/api/getredinfo")
-    public List<RedInfo> getredinfo() {
+    @GetMapping(value = "/api/getredinfo1")
+    public List<RedInfo> getredinfo1() {
         List<RedInfo> redinfoList = redInfoService.selectAll();
         log.info("userList = [{}]", redinfoList);
         return redinfoList;
     }
 
     /**
+     * 获取红包详情
+     *
+     * @return 返回状态码，消息提示以及设置的红包详情
+     */
+    @GetMapping(value = "/api/getredinfo")
+    public Result<Object> getredinfo() {
+
+        return redInfoService.select();
+    }
+
+    /**
      * 设置红包接口
+     * @param redInfo 获取前端form表信息
+     * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/setred")
     public Result<Object> setred(@RequestBody RedInfo redInfo) {
@@ -74,6 +87,11 @@ public class UserController {
         }
     }
 
+    /**
+     * 发送红包接口
+     * @param redInfo 获取前端红包信息
+     * @return 返回状态码和消息提示
+     */
     @PostMapping(value = "/api/sendred")
     public Result<Object> sendred(@RequestBody RedInfo redInfo) {
 
@@ -93,6 +111,12 @@ public class UserController {
         return ResultUtil.result(ResultEnum.REDSEND_SUCCESS);
     }
 
+    /**
+     * 抢红包接口
+     * @param rid 获取前端红包id
+     * @param id 获取前端抢红包用户id
+     * @return 返回状态码和消息提示
+     */
     @PostMapping(value = "/api/getred")
     public Result<Object> getred(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
 
@@ -118,7 +142,7 @@ public class UserController {
 //                return "您已经抢过红包了";
                 return ResultUtil.result(ResultEnum.USERGET_NO);
             } else {
-                String key = redEnvelopcurrent.getRid()+"redmoneylist";
+                String key = redEnvelopcurrent.getRid() + "redmoneylist";
                 //获得此次红包金额
                 int remainSize = redEnvelopcurrent.getRestcount();
                 Double remainMoney = redEnvelopcurrent.getRestmoney();
@@ -155,21 +179,20 @@ public class UserController {
 //            return "红包已经抢完了";
             return ResultUtil.result(ResultEnum.REDCOUNT_NO);
         } else {
-                String key = redEnvelopcurrent.getRid()+"redmoneylist";
-                //获得此次红包金额
-                int remainSize = redEnvelopcurrent.getRestcount();
-                Double remainMoney = redEnvelopcurrent.getRestmoney();
-                try {
-                    double money = (double) redisTemplate.boundListOps(key).rightPop();
-                    log.info("money = {}", money);
-                }
-                catch (Exception e){
-                    return ResultUtil.result(ResultEnum.FAIL);
-                }
-                return ResultUtil.result(ResultEnum.SUCCESS);
-                //用户抢到红包更新账户余额
+            String key = redEnvelopcurrent.getRid() + "redmoneylist";
+            //获得此次红包金额
+            int remainSize = redEnvelopcurrent.getRestcount();
+            Double remainMoney = redEnvelopcurrent.getRestmoney();
+            try {
+                double money = (double) redisTemplate.boundListOps(key).rightPop();
+                log.info("money = {}", money);
+            } catch (Exception e) {
+                return ResultUtil.result(ResultEnum.FAIL);
+            }
+            return ResultUtil.result(ResultEnum.SUCCESS);
+            //用户抢到红包更新账户余额
 //                userService.updateUserifo(id, money);
-                //更新红包数据
+            //更新红包数据
 //                remainSize--;
 //                remainMoney -= money;
 //                redEnvelopService.updateenvelop(redEnvelopcurrent, remainMoney, remainSize);
@@ -177,11 +200,11 @@ public class UserController {
 //                redDetailService.updateRedDetail(redEnvelopcurrent, money, rid,2);
 //                //return 成功抢到红包
 //                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
-            }
+        }
     }
 
     @PostMapping(value = "/test1")
-    public Result<Object> test1(@RequestParam("rid") Integer rid,@RequestParam("id") Integer id) {
+    public Result<Object> test1(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
 
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
         wrapper
@@ -204,7 +227,7 @@ public class UserController {
             if (redDetailService.selectOne(queryWrapper) != null) {
 //                return "您已经抢过红包了";
                 return ResultUtil.result(ResultEnum.USERGET_NO);
-            }else {
+            } else {
                 String key = redEnvelopcurrent.getRid() + "redmoneylist";
                 //获得此次红包金额
                 int remainSize = redEnvelopcurrent.getRestcount();

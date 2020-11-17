@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import priv.hsy.redenvelops.entity.RedEnvelop;
 import priv.hsy.redenvelops.mapper.RedEnvelopMapper;
 import priv.hsy.redenvelops.service.RedEnvelopService;
-import priv.hsy.redenvelops.utils.GetMoney;
+import priv.hsy.redenvelops.utils.GetMoneyUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         String key = rid+"redmoneylist";
         List<Double> redmoneylist = new ArrayList<>();
         while (count > 0) {
-            double result = GetMoney.getRandomMoney(count, totalmoney);
+            double result = GetMoneyUtil.getRandomMoney(count, totalmoney);
             redmoneylist.add(result);
             redisTemplate.opsForList().rightPush(key, result);
             totalmoney -= result;

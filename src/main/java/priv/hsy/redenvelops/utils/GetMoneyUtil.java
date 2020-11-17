@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
-public class GetMoney {
+public class GetMoneyUtil {
 
     public static void line_cut(int money,int people ) {
         List<Double> team=new ArrayList<>();
