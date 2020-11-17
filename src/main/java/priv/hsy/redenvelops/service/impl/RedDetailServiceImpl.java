@@ -8,6 +8,8 @@ import priv.hsy.redenvelops.entity.RedEnvelop;
 import priv.hsy.redenvelops.mapper.RedDtailMapper;
 import priv.hsy.redenvelops.service.RedDetailService;
 
+import java.sql.Timestamp;
+
 
 @Service
 public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail> implements RedDetailService {
@@ -26,6 +28,8 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
      */
     @Override
     public int insert(RedDetail redDetail) {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redDetail.setGetTime(time);
         this.baseMapper.insert(redDetail);
         return 1;
     }

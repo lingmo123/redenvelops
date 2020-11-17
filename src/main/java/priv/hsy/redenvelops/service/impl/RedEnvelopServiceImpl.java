@@ -11,6 +11,7 @@ import priv.hsy.redenvelops.mapper.RedEnvelopMapper;
 import priv.hsy.redenvelops.service.RedEnvelopService;
 import priv.hsy.redenvelops.utils.GetMoneyUtil;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,8 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
 
     @Override
     public int insert(RedEnvelop redEnvelop) {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redEnvelop.setSendTime(time);
         this.baseMapper.insert(redEnvelop);
         redmoneyinit(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalMoney());
         return 1;

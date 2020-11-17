@@ -19,6 +19,13 @@ public class RedInfo {
     private Boolean status;
     private Integer sendId;
     private Timestamp createTime;
+    private Timestamp updateTime;
+
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     public Timestamp getCreateTime() {

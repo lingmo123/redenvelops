@@ -69,6 +69,8 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
     public boolean update(RedInfo redInfo, int rid, int count, double totalMoney){
         redInfo.setCount(count);
         redInfo.setTotalMoney(totalMoney);
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redInfo.setUpdateTime(time);
         this.baseMapper.updateById(redInfo);
         return true;
     }
