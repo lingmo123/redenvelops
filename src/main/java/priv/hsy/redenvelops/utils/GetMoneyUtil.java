@@ -62,6 +62,7 @@ public class GetMoneyUtil {
         if (remainSize == 1) {
             remainSize--;
             return (double) Math.round(remainMoney * 100) / 100;
+//            return remainMoney;
         }
         Random r = new Random();
         double min = 0.01; //
@@ -76,30 +77,23 @@ public class GetMoneyUtil {
     }
 
     public static void main(String[] args) throws ParseException {
-//        List<Double> list=new ArrayList<>();
-//        int remainSize=10;
-//
-//        double remainMoney=100;
-//        while(remainSize>0){
-//                double result = GetMoney.getRandomMoney(remainSize, remainMoney);
-//                list.add(result);
-//                remainMoney -= result;
-//                remainSize--;
-//        }
-//        double total=0.0;
-//        for (double a:list
-//             ) {
-//            total+=a;
-//        }
-//        log.info("list={} {} ",list,total);
+        List<Double> list=new ArrayList<>();
+        int remainSize=10;
+
+        double remainMoney=100;
+        while(remainSize>0){
+                double result = getRandomMoney(remainSize, remainMoney);
+                list.add(result);
+                remainMoney -= result;
+                remainSize--;
+        }
+        double total=0.0;
+        for (double a:list
+             ) {
+            total+=a;
+        }
+        log.info("list={} {} ",list,total);
 //        line_cut(100,10);
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-        String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
-        java.text.SimpleDateFormat formatter =
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date Time = formatter.parse(date);
-        log.info(date);
-        log.info(String.valueOf(Time));
     }
 }

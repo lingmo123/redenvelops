@@ -20,6 +20,7 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
 
     /**
      * 获取确定id的红包详情
+     *
      * @param rid
      * @return
      */
@@ -27,8 +28,10 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
     public RedInfo selectById(int rid) {
         return this.baseMapper.selectById(rid);
     }
+
     /**
      * 获取所有的红包详情
+     *
      * @return
      */
     @Override
@@ -38,32 +41,32 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
 
     /**
      * 分页查询所有红包详情
-     * @param page
+     *
+     * @param currentPage
      * @return
      */
     @Override
-    public PageBean selectPage(int page) {
+    public PageBean selectPage(int currentPage, int pageSize) {
         PageBean pageBean = new PageBean();
-        pageBean.setPage(page);
+        pageBean.setPage(currentPage);
         int total = this.baseMapper.selectCount(null);
         pageBean.setTotal(total);
         int totalPage;
-        int limit = 5;
-        pageBean.setLimit(limit);
-        if (total % limit == 0) {
-            totalPage = total / limit;
+        pageBean.setLimit(pageSize);
+        if (total % pageSize == 0) {
+            totalPage = total / pageSize;
         } else {
-            totalPage = total / limit + 1;
+            totalPage = total / pageSize + 1;
         }
         pageBean.setTotalPage(totalPage);
         List<Integer> pages = new ArrayList<>();
-        for(int i=1;i<totalPage+1;i++) {
+        for (int i = 1; i < totalPage + 1; i++) {
             pages.add(i);
         }
         pageBean.setPages(pages);
         //page是当前页，limit是每页多少数据
-        Page<RedInfo> page1 = new Page<>(page,limit);
-        List<RedInfo> redInfoList=this.baseMapper.selectPage(page1, null).getRecords();
+        Page<RedInfo> page1 = new Page<>(currentPage, pageSize);
+        List<RedInfo> redInfoList = this.baseMapper.selectPage(page1, null).getRecords();
         pageBean.setPageRecode(redInfoList);
 
         return pageBean;
@@ -71,6 +74,7 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
 
     /**
      * 插入红包信息至数据库
+     *
      * @param redInfo
      * @return
      */
@@ -84,14 +88,15 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
 
     /**
      * 更新已经设置的红包信息
+     *
      * @param redInfo
-     * @param rid 红包id
-     * @param count 更新后的红包数量
+     * @param rid        红包id
+     * @param count      更新后的红包数量
      * @param totalMoney 更新后的红包总金额
      * @return
      */
     @Override
-    public boolean update(RedInfo redInfo, int rid, int count, double totalMoney){
+    public boolean update(RedInfo redInfo, int rid, int count, double totalMoney) {
         redInfo.setCount(count);
         redInfo.setTotalMoney(totalMoney);
         Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -99,6 +104,7 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
         this.baseMapper.updateById(redInfo);
         return true;
     }
+
     /**
      * 将红包信息存入数据库
      */

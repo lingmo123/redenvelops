@@ -19,5 +19,5 @@ public interface RedInfoService {
 
     Result<Object> setRed(RedInfo redInfo);
 
-    PageBean selectPage(int page);
+    PageBean selectPage(int currentPage, int pageSize);
 }

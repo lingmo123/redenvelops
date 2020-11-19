@@ -2,6 +2,7 @@ package priv.hsy.redenvelops.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,6 +16,7 @@ import priv.hsy.redenvelops.service.UserService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -49,12 +51,26 @@ public class UserController {
         return ResultUtil.result(ResultEnum.SUCCESS, redInfoList);
     }
 
-    @GetMapping(value = "/api/getpageredinfo")
-    public Result<Object> getPageRedInfo() {
-        int page = 1;
-        PageBean pageBean = redInfoService.selectPage(page);
+    /**
+     * 分页显示所有设置红包详情
+     *
+     * @param currentPage
+     * @param pageSize
+     * @return
+     */
+    @PostMapping(value = "/api/getpageredinfo")
+    public Result<Object> getPageRedInfo(@RequestParam("currentPage") Integer currentPage,
+                                         @RequestParam("pageSize") Integer pageSize) {
+
+        PageBean pageBean = redInfoService.selectPage(currentPage, pageSize);
         log.info("list = [{}]", pageBean.getPageRecode());
         return ResultUtil.result(ResultEnum.SUCCESS, pageBean);
+    }
+
+    @GetMapping(value = "/api/getredenvelop")
+    public Result<Object> getRedEnvelop() {
+        List<RedEnvelop> redEnvelopList = redEnvelopService.selectAll();
+        return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopList);
     }
 
     /**
@@ -92,8 +108,8 @@ public class UserController {
     /**
      * 编辑已设置的红包
      *
-     * @param rid 红包ID
-     * @param count 红包数量
+     * @param rid        红包ID
+     * @param count      红包数量
      * @param totalMoney 红包金额
      * @return 返回状态码和消息提示
      */
@@ -204,42 +220,36 @@ public class UserController {
 
     @PostMapping(value = "/test")
     public Result<Object> test(@RequestParam("rid") Integer rid) {
+        String key = rid + "redMoneylist";
+        String redInfoCount = rid + "redInfoCount";
+        String redInfoMoney = rid + "redInfoMoney";
 
-        QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
-        wrapper
-                .eq("rid", rid);
-        //获得所抢红包信息
-        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(wrapper);
+        Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", "first", 2, TimeUnit.SECONDS);
+        if (Boolean.FALSE.equals(lock)) {
+            return ResultUtil.result(ResultEnum.FAIL, "lock");
+        }
+        try {
+            double restMoney = (double) redisTemplate.opsForValue().get(redInfoMoney);
+            Integer restSize = (int) redisTemplate.opsForValue().get(redInfoCount);
 
-        if (redEnvelopcurrent.getStatus().equals(false)) {
-//            return "红包还未开始抢";
-            return null;
-        } else if (redEnvelopcurrent.getRestCount() < 0) {
-
-//            return "红包已经抢完了";
-            return ResultUtil.result(ResultEnum.REDCOUNT_NO);
-        } else {
-            String key = redEnvelopcurrent.getRid() + "redmoneylist";
-            //获得此次红包金额
-            int remainSize = redEnvelopcurrent.getRestCount();
-            Double remainMoney = redEnvelopcurrent.getRestMoney();
-            try {
-                double money = (double) redisTemplate.boundListOps(key).rightPop();
-                log.info("money = {}", money);
-            } catch (Exception e) {
-                return ResultUtil.result(ResultEnum.FAIL);
+            log.info("restMoney = {}", restMoney);
+            log.info("restSize = {}", restSize);
+            if (restSize != null && restSize > 0) {
+                redisTemplate.opsForValue().decrement(redInfoCount);
+                Double money = (Double) redisTemplate.boundListOps(key).rightPop();
+                if (money == null) {
+                    return ResultUtil.result(ResultEnum.FAIL, "monry == null");
+                }
+                restMoney -= money;
+                redisTemplate.opsForValue().set(redInfoMoney, restMoney);
+                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+            } else {
+                return ResultUtil.result(ResultEnum.REDCOUNT_NO);
             }
-            return ResultUtil.result(ResultEnum.SUCCESS);
-            //用户抢到红包更新账户余额
-//                userService.updateUserifo(id, money);
-            //更新红包数据
-//                remainSize--;
-//                remainMoney -= money;
-//                redEnvelopService.updateEnvelop(redEnvelopcurrent, remainMoney, remainSize);
-//                //更新红包明细
-//                redDetailService.updateRedDetail(redEnvelopcurrent, money, rid,2);
-//                //return 成功抢到红包
-//                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+        } catch (Exception e) {
+            return ResultUtil.result(ResultEnum.FAIL, "catch");
+        } finally {
+            redisTemplate.delete("lock");
         }
     }
 
@@ -263,7 +273,7 @@ public class UserController {
             QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
             queryWrapper.and(i -> i
                     .eq("rid", rid)
-                    .eq("receiveid", id));
+                    .eq("receive_id", id));
             if (redDetailService.selectOne(queryWrapper) != null) {
 //                return "您已经抢过红包了";
                 return ResultUtil.result(ResultEnum.USERGET_NO);
@@ -278,13 +288,81 @@ public class UserController {
                     //用户抢到红包更新账户余额
                     userService.updateUserifo(id, money);
                     //更新红包数据
-                    remainSize--;
                     remainMoney -= money;
+                    remainSize--;
                     redEnvelopService.updateEnvelop(redEnvelopcurrent, remainMoney, remainSize);
                     //更新红包明细
                     redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
                     //return 成功抢到红包
                     return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+
+
+                } catch (Exception e) {
+                    return ResultUtil.result(ResultEnum.REDCOUNT_NO);
+                }
+            }
+        }
+    }
+
+    @PostMapping(value = "/test2")
+    public Result<Object> test2(@RequestParam("rid") Integer rid, @RequestParam("id") Integer id) {
+
+        QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
+        wrapper
+                .eq("rid", rid);
+        //获得所抢红包信息
+        RedEnvelop redEnvelopcurrent = redEnvelopService.selectOne(wrapper);
+
+        if (redEnvelopcurrent.getStatus().equals(false)) {
+//            return "红包还未开始抢";
+            return null;
+        } else {//判断该红包此id是否已经抢过
+            QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
+            queryWrapper.and(i -> i
+                    .eq("rid", rid)
+                    .eq("receive_id", id));
+            if (redDetailService.selectOne(queryWrapper) != null) {
+//                return "您已经抢过红包了";
+                return ResultUtil.result(ResultEnum.USERGET_NO);
+            } else {
+                String key = redEnvelopcurrent.getRid() + "redmoneylist";
+                String redinfokey = redEnvelopcurrent.getRid() + "redinfolist";
+                try {
+                    double restMoney = (double) redisTemplate.opsForList().index(redinfokey, 0);
+                    int restSize = (int) redisTemplate.opsForList().index(redinfokey, 1);
+//                    double restMoney = (double) redisTemplate.opsForList().index(key, 0);
+//                    int restSize = (int) redisTemplate.opsForList().index(key, 1);
+                    if (restMoney == 0) {
+                        return ResultUtil.result(ResultEnum.REDCOUNT_NO);
+                    }
+                    if (restSize == 0) {
+                        return ResultUtil.result(ResultEnum.REDCOUNT_NO);
+                    } else {
+                        try {
+                            double money = (double) redisTemplate.boundListOps(key).rightPop();
+                            restMoney -= money;
+                            restSize--;
+                            redisTemplate.opsForList().set(redinfokey, 0, restMoney);
+                            redisTemplate.opsForList().set(redinfokey, 1, restSize);
+//                            redisTemplate.opsForList().set(key, 0, restMoney);
+//                            redisTemplate.opsForList().set(key, 1, restSize);
+                            log.info("money = {}", money);
+                            //用户抢到红包更新账户余额
+                            userService.updateUserifo(id, money);
+                            //更新红包数据
+
+                            redEnvelopService.updateEnvelop(redEnvelopcurrent, restMoney, restSize);
+                            //更新红包明细
+                            redDetailService.updateRedDetail(redEnvelopcurrent, money, rid, id);
+                            //return 成功抢到红包
+                            return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
+                        } catch (Exception e) {
+                            return ResultUtil.result(ResultEnum.FAIL);
+                        }
+
+
+                    }
+
                 } catch (Exception e) {
                     return ResultUtil.result(ResultEnum.REDCOUNT_NO);
                 }
