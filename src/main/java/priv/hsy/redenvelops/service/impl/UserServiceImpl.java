@@ -43,8 +43,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public String updateUserifo(int id, double money) {
-        User user = selectById(id);
+    public String updateUserifo(int uid, double money) {
+        User user = selectById(uid);
         double totalmoney = user.getMoney();
         totalmoney += money;
         user.setMoney(totalmoney);

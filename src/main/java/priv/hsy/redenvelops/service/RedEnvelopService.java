@@ -2,6 +2,8 @@ package priv.hsy.redenvelops.service;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import priv.hsy.redenvelops.entity.RedEnvelop;
+import priv.hsy.redenvelops.entity.RedEnvelopPageBean;
+import priv.hsy.redenvelops.entity.RedInfoPageBean;
 
 import java.util.List;
 
@@ -13,8 +15,10 @@ public interface RedEnvelopService {
 
     String insert(RedEnvelop redEnvelop);
 
-    boolean updateById(RedEnvelop redEnvelop);
+    boolean update(Integer rid);
 
     String updateEnvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
+
+    RedEnvelopPageBean selectPage(int currentPage, int pageSize);
 
 }

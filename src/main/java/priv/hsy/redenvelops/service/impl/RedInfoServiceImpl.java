@@ -3,7 +3,7 @@ package priv.hsy.redenvelops.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import priv.hsy.redenvelops.entity.PageBean;
+import priv.hsy.redenvelops.entity.RedInfoPageBean;
 import priv.hsy.redenvelops.entity.RedInfo;
 import priv.hsy.redenvelops.entity.Result;
 import priv.hsy.redenvelops.enums.ResultEnum;
@@ -12,7 +12,6 @@ import priv.hsy.redenvelops.service.RedInfoService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,30 +45,30 @@ public class RedInfoServiceImpl extends ServiceImpl<RedInfoMapper, RedInfo> impl
      * @return
      */
     @Override
-    public PageBean selectPage(int currentPage, int pageSize) {
-        PageBean pageBean = new PageBean();
-        pageBean.setPage(currentPage);
+    public RedInfoPageBean selectPage(int currentPage, int pageSize) {
+        RedInfoPageBean redInfoPageBean = new RedInfoPageBean();
+        redInfoPageBean.setPage(currentPage);
         int total = this.baseMapper.selectCount(null);
-        pageBean.setTotal(total);
+        redInfoPageBean.setTotal(total);
         int totalPage;
-        pageBean.setLimit(pageSize);
+        redInfoPageBean.setLimit(pageSize);
         if (total % pageSize == 0) {
             totalPage = total / pageSize;
         } else {
             totalPage = total / pageSize + 1;
         }
-        pageBean.setTotalPage(totalPage);
-        List<Integer> pages = new ArrayList<>();
-        for (int i = 1; i < totalPage + 1; i++) {
-            pages.add(i);
-        }
-        pageBean.setPages(pages);
+        redInfoPageBean.setTotalPage(totalPage);
+//        List<Integer> pages = new ArrayList<>();
+//        for (int i = 1; i < totalPage + 1; i++) {
+//            pages.add(i);
+//        }
+//        redInfoPageBean.setPages(pages);
         //page是当前页，limit是每页多少数据
         Page<RedInfo> page1 = new Page<>(currentPage, pageSize);
         List<RedInfo> redInfoList = this.baseMapper.selectPage(page1, null).getRecords();
-        pageBean.setPageRecode(redInfoList);
+        redInfoPageBean.setPageRecode(redInfoList);
 
-        return pageBean;
+        return redInfoPageBean;
     }
 
     /**

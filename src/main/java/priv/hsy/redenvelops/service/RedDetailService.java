@@ -4,10 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import priv.hsy.redenvelops.entity.RedDetail;
 import priv.hsy.redenvelops.entity.RedEnvelop;
 
+import java.util.List;
+
 public interface RedDetailService {
     RedDetail selectOne(Wrapper<RedDetail> wrapper);
 
-    String insert(RedDetail redDetail);
+//    String insert(int uid, int rid, double money);
 
-    String updateRedDetail(RedEnvelop redEnvelop, double money, int rid, int id);
+    String insert(int uid, int rid, double money);
+
+    List<RedDetail> selectDetails(int rid);
 }

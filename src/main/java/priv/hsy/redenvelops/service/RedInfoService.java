@@ -1,7 +1,6 @@
 package priv.hsy.redenvelops.service;
 
-import priv.hsy.redenvelops.entity.PageBean;
-import priv.hsy.redenvelops.entity.RedEnvelop;
+import priv.hsy.redenvelops.entity.RedInfoPageBean;
 import priv.hsy.redenvelops.entity.RedInfo;
 import priv.hsy.redenvelops.entity.Result;
 
@@ -19,5 +18,5 @@ public interface RedInfoService {
 
     Result<Object> setRed(RedInfo redInfo);
 
-    PageBean selectPage(int currentPage, int pageSize);
+    RedInfoPageBean selectPage(int currentPage, int pageSize);
 }
