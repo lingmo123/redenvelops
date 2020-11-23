@@ -59,10 +59,11 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public boolean update(Integer rid) {
+    public boolean update(Integer rid, Double money) {
         RedEnvelop redEnvelop = new RedEnvelop();
         UpdateWrapper updateWrapper = new UpdateWrapper();
         updateWrapper.setSql("rest_count = rest_count - 1");
+        updateWrapper.setSql("rest_money = rest_money -"+money);
         updateWrapper.eq("rid",rid);
 
         this.baseMapper.update(redEnvelop,updateWrapper);
@@ -98,6 +99,12 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return "更新成功";
     }
 
+    /**
+     * 分页查询
+     * @param currentPage 当前页
+     * @param pageSize  每页大小
+     * @return
+     */
     @Override
     public RedEnvelopPageBean selectPage(int currentPage, int pageSize) {
         RedEnvelopPageBean redEnvelopPageBean = new RedEnvelopPageBean();

@@ -15,7 +15,7 @@ public interface RedEnvelopService {
 
     String insert(RedEnvelop redEnvelop);
 
-    boolean update(Integer rid);
+    boolean update(Integer rid, Double money);
 
     String updateEnvelop(RedEnvelop redEnvelop, double remainMoney, int remainSize);
 

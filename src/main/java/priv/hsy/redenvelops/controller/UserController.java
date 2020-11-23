@@ -230,7 +230,7 @@ public class UserController {
                 //红包明细
                 redDetailService.insert(uid, rid, money);
                 //更新红包剩余数量
-                redEnvelopService.update(rid);
+                redEnvelopService.update(rid,money);
                 //用户抢到红包更新账户余额
                 userService.updateUserifo(uid, money);
                 return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
