@@ -16,15 +16,27 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class RedEnvelop {
     @TableId(type = IdType.AUTO)
-    private Integer id;
     private Integer rid;
     private Integer sendId;
     private Double totalMoney;
     private Double restMoney;
     private Integer count;
     private Integer restCount;
-    private Boolean status;
+    private Integer status;
     private Timestamp sendTime;
+    private Timestamp createTime;
+    private Timestamp updateTime;
+
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     public Timestamp getSendTime() {

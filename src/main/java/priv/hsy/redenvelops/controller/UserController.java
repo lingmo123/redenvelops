@@ -27,8 +27,6 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private RedInfoService redInfoService;
-    @Autowired
     private RedEnvelopService redEnvelopService;
     @Autowired
     private RedDetailService redDetailService;
@@ -41,18 +39,6 @@ public class UserController {
         log.info("userList = [{}]", userList);
         return userList;
     }
-
-    /**
-     * 获取红包详情
-     *
-     * @return 返回状态码，消息提示以及设置的红包详情
-     */
-    @GetMapping(value = "/api/getredinfo")
-    public Result<Object> getRedInfo() {
-        List<RedInfo> redInfoList = redInfoService.select();
-        return ResultUtil.result(ResultEnum.SUCCESS, redInfoList);
-    }
-
     /**
      * 分页显示所有设置红包详情
      *
@@ -65,15 +51,9 @@ public class UserController {
     public Result<Object> getPageRedInfo(@ApiParam(value = "当前页") @RequestParam("currentPage") Integer currentPage,
                                          @ApiParam(value = "每页大小") @RequestParam("pageSize") Integer pageSize) {
 
-        RedInfoPageBean redInfoPageBean = redInfoService.selectPage(currentPage, pageSize);
-        log.info("list = [{}]", redInfoPageBean.getPageRecode());
-        return ResultUtil.result(ResultEnum.SUCCESS, redInfoPageBean);
-    }
-
-    @GetMapping(value = "/api/getredenvelop")
-    public Result<Object> getRedEnvelop() {
-        List<RedEnvelop> redEnvelopList = redEnvelopService.selectAll();
-        return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopList);
+        RedEnvelopPageBean redEnvelopPageBean = redEnvelopService.selectPageRedInfo(currentPage, pageSize);
+        log.info("list = [{}]", redEnvelopPageBean.getPageRecode());
+        return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopPageBean);
     }
 
     @PostMapping(value = "/api/getpageredenvelop")
@@ -87,35 +67,34 @@ public class UserController {
     }
 
     /**
-     * 编辑红包接口
+     * 创建红包接口
      *
-     * @param redInfo 获取前端form表信息
+     * @param redEnvelop 获取前端form表信息
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/setred")
     @ApiOperation(value = "编辑红包信息")
-    public Result<Object> setRed(@RequestBody RedInfo redInfo) {
-        User user = userService.selectById(redInfo.getSendId());
+    public Result<Object> setRed(@RequestBody RedEnvelop redEnvelop) {
+        int uid = redEnvelop.getSendId();
+        User user = userService.selectById(uid);
         double money = user.getMoney();
         //红包金额下限
-        if (redInfo.getTotalMoney() < 0.01) {
+        if (redEnvelop.getTotalMoney() < 0.01) {
 //            return "红包金额最小值为0.01";
             return ResultUtil.result(ResultEnum.REDMONEY_MIN);
             //红包数量下限
-        } else if (redInfo.getCount() < 1) {
+        } else if (redEnvelop.getCount() < 1) {
 //            return "红包数量最小为1";
             return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
             //用户余额是否不足
-        } else if (money < redInfo.getTotalMoney()) {
+        } else if (money < redEnvelop.getTotalMoney()) {
 //            return "你的余额不足，无法设置红包，请加班挣钱！";
             return ResultUtil.result(ResultEnum.USERMONEY_NO);
         } else {//发红包用户余额更新
-            double restmoney = money - redInfo.getTotalMoney();
-            User user1 = new User();
-            user1.setUid(1);
-            user1.setMoney(restmoney);
-            userService.updateById(user1);
-            return redInfoService.setRed(redInfo);
+            double restmoney = money - redEnvelop.getTotalMoney();
+            user.setMoney(restmoney);
+            userService.updateById(user);
+            return redEnvelopService.setRed(redEnvelop);
         }
     }
 
@@ -132,8 +111,8 @@ public class UserController {
     public Result<Object> updateRed(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid,
                                     @ApiParam(value = "红包数量") @RequestParam("count") Integer count,
                                     @ApiParam(value = "红包金额") @RequestParam("totalMoney") Double totalMoney) {
-        RedInfo redInfo = redInfoService.selectById(rid);
-        User user = userService.selectById(redInfo.getSendId());
+        RedEnvelop redEnvelop = redEnvelopService.selectById(rid);
+        User user = userService.selectById(redEnvelop.getSendId());
         if (totalMoney < 0.01) {
 //            return "红包金额最小值为0.01";
             return ResultUtil.result(ResultEnum.REDMONEY_MIN);
@@ -142,15 +121,15 @@ public class UserController {
 //            return "红包数量最小为1";
             return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
             //用户余额是否不足
-        } else if (totalMoney > redInfo.getTotalMoney() + user.getMoney()) {
+        } else if (totalMoney > redEnvelop.getTotalMoney() + user.getMoney()) {
 //            return "你的余额不足，无法设置红包！";
             return ResultUtil.result(ResultEnum.USERMONEY_NO);
         } else {
             //红包信息更新
-            double restmoney = (totalMoney - redInfo.getTotalMoney()) + user.getMoney();
-            redInfoService.update(redInfo, rid, count, totalMoney);
+            double restmoney = (totalMoney - redEnvelop.getTotalMoney()) + user.getMoney();
+            redEnvelopService.updateEnvelop(redEnvelop, count, totalMoney);
             //发红包用户余额更新
-            user.setUid(redInfo.getSendId());
+            user.setUid(redEnvelop.getSendId());
             user.setMoney(restmoney);
             userService.updateById(user);
             return ResultUtil.result(ResultEnum.REDSET_SUCCESS);
@@ -166,19 +145,7 @@ public class UserController {
     @PostMapping(value = "/api/sendred")
     @ApiOperation(value = "发送红包")
     public Result<Object> sendRed(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid) {
-        RedInfo redInfo =  redInfoService.selectById(rid);
-        RedEnvelop redEnvelop = new RedEnvelop();
-        redEnvelop.setCount(redInfo.getCount());
-        //设置剩余红包个数
-        redEnvelop.setRestCount(redInfo.getCount());
-        redEnvelop.setRid(redInfo.getRid());
-        redEnvelop.setTotalMoney(redInfo.getTotalMoney());
-        //设置剩余金额
-        redEnvelop.setRestMoney(redInfo.getTotalMoney());
-        redEnvelop.setSendId(redInfo.getSendId());
-        redEnvelop.setStatus(true);
-
-        redEnvelopService.insert(redEnvelop);
+        redEnvelopService.sendRed(rid);
         //return "成功发送红包！"
         return ResultUtil.result(ResultEnum.REDSEND_SUCCESS);
     }
@@ -196,7 +163,6 @@ public class UserController {
                                  @ApiParam(value = "用户id") @RequestParam("id") Integer uid) {
         String key = rid + "redMoneylist";
         String redInfoCount = rid + "redInfoCount";
-        String redInfoMoney = rid + "redInfoMoney";
         Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", "first", 5, TimeUnit.SECONDS);
         if (Boolean.FALSE.equals(lock)) {
             return ResultUtil.result(ResultEnum.FAIL, "lock");
@@ -210,14 +176,10 @@ public class UserController {
 ////                return "您已经抢过红包了";
 //                return ResultUtil.result(ResultEnum.USERGET_NO);
 //            }
-            Double restMoney = (Double) redisTemplate.opsForValue().get(redInfoMoney);
             Integer restSize = (Integer) redisTemplate.opsForValue().get(redInfoCount);
-
-            log.info("restMoney = {}", restMoney);
             log.info("restSize = {}", restSize);
             if (restSize > 0) {
                 redisTemplate.opsForValue().decrement(redInfoCount);
-
                 Double money = (Double) redisTemplate.boundListOps(key).rightPop();
                 String usergetkey = rid + "get" + uid;
                 assert money != null;
@@ -233,11 +195,13 @@ public class UserController {
                 redEnvelopService.update(rid,money);
                 //用户抢到红包更新账户余额
                 userService.updateUserifo(uid, money);
+
+                if(restSize == 1){
+                    redEnvelopService.overRed(rid);
+                }
                 return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
             }
-            else{
 
-            }
         } catch (Exception e) {
             return ResultUtil.result(ResultEnum.FAIL);
         } finally {

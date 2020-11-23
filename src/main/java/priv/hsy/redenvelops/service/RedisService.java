@@ -7,6 +7,4 @@ public interface RedisService {
 
     Result<Object> redRedisGetNoUid(String key, String redInfoCount, String redInfoMoney);
 
-    Result<Object> redRedisGetUid(String key, String redInfoCount, String redInfoMoney, Integer uid);
-
 }

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import priv.hsy.redenvelops.entity.RedDetail;
-import priv.hsy.redenvelops.entity.RedEnvelop;
 import priv.hsy.redenvelops.mapper.RedDtailMapper;
 import priv.hsy.redenvelops.service.RedDetailService;
 
