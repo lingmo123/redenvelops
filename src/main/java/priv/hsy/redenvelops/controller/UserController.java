@@ -2,7 +2,9 @@ package priv.hsy.redenvelops.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
+@Api( tags = "红包管理接口模块")
 public class UserController {
 
     @Autowired
@@ -58,8 +61,9 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "/api/getpageredinfo")
-    public Result<Object> getPageRedInfo(@RequestParam("currentPage") Integer currentPage,
-                                         @RequestParam("pageSize") Integer pageSize) {
+    @ApiOperation(value = "分页查询所有红包设置红包详情")
+    public Result<Object> getPageRedInfo(@ApiParam(value = "当前页") @RequestParam("currentPage") Integer currentPage,
+                                         @ApiParam(value = "每页大小") @RequestParam("pageSize") Integer pageSize) {
 
         RedInfoPageBean redInfoPageBean = redInfoService.selectPage(currentPage, pageSize);
         log.info("list = [{}]", redInfoPageBean.getPageRecode());
@@ -73,8 +77,9 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/getpageredenvelop")
-    public Result<Object> getPageRedEnvelop(@RequestParam("currentPage") Integer currentPage,
-                                            @RequestParam("pageSize") Integer pageSize) {
+    @ApiOperation(value = "分页查询所有正在发送的红包详情")
+    public Result<Object> getPageRedEnvelop(@ApiParam(value = "当前页") @RequestParam("currentPage") Integer currentPage,
+                                            @ApiParam(value = "每页大小") @RequestParam("pageSize") Integer pageSize) {
 
         RedEnvelopPageBean redEnvelopPageBean = redEnvelopService.selectPage(currentPage, pageSize);
         log.info("list = [{}]", redEnvelopPageBean.getPageRecode());
@@ -82,12 +87,13 @@ public class UserController {
     }
 
     /**
-     * 设置红包接口
+     * 编辑红包接口
      *
      * @param redInfo 获取前端form表信息
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/setred")
+    @ApiOperation(value = "编辑红包信息")
     public Result<Object> setRed(@RequestBody RedInfo redInfo) {
         User user = userService.selectById(redInfo.getSendId());
         double money = user.getMoney();
@@ -114,7 +120,7 @@ public class UserController {
     }
 
     /**
-     * 编辑已设置的红包
+     * 更新已设置的红包
      *
      * @param rid        红包ID
      * @param count      红包数量
@@ -122,8 +128,10 @@ public class UserController {
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/updatered")
-    public Result<Object> updateRed(@RequestParam("rid") Integer rid, @RequestParam("count") Integer count,
-                                    @RequestParam("totalMoney") Double totalMoney) {
+    @ApiOperation(value = "更新已设置的红包")
+    public Result<Object> updateRed(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid,
+                                    @ApiParam(value = "红包数量") @RequestParam("count") Integer count,
+                                    @ApiParam(value = "红包金额") @RequestParam("totalMoney") Double totalMoney) {
         RedInfo redInfo = redInfoService.selectById(rid);
         User user = userService.selectById(redInfo.getSendId());
         if (totalMoney < 0.01) {
@@ -152,12 +160,13 @@ public class UserController {
     /**
      * 发送红包接口
      *
-     * @param redInfo 获取前端红包信息
+     * @param rid 红包id
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/sendred")
-    public Result<Object> sendRed(@RequestBody RedInfo redInfo) {
-
+    @ApiOperation(value = "发送红包")
+    public Result<Object> sendRed(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid) {
+        RedInfo redInfo =  redInfoService.selectById(rid);
         RedEnvelop redEnvelop = new RedEnvelop();
         redEnvelop.setCount(redInfo.getCount());
         //设置剩余红包个数
@@ -182,7 +191,9 @@ public class UserController {
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/getred")
-    public Result<Object> getRed(@RequestParam("rid") Integer rid, @RequestParam("id") Integer uid) {
+    @ApiOperation(value = "抢红包")
+    public Result<Object> getRed(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid,
+                                 @ApiParam(value = "用户id") @RequestParam("id") Integer uid) {
         String key = rid + "redMoneylist";
         String redInfoCount = rid + "redInfoCount";
         String redInfoMoney = rid + "redInfoMoney";
@@ -236,7 +247,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/getrednouid")
-    public Result<Object> test(@RequestParam("rid") Integer rid) {
+    public Result<Object> test(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid) {
         String key = rid + "redMoneylist";
         String redInfoCount = rid + "redInfoCount";
         String redInfoMoney = rid + "redInfoMoney";
@@ -310,8 +321,14 @@ public class UserController {
 
     }
 
+    /**
+     * 添加红包明细
+     * @param rid 红包id
+     * @return
+     */
     @PostMapping(value = "/api/getreddetails")
-    public Result<Object> getRedDetails(@RequestParam("rid") Integer rid) {
+    @ApiOperation(value = "添加红包明细")
+    public Result<Object> getRedDetails(@ApiParam(value = "红包id") @RequestParam("rid") Integer rid) {
         List<RedDetail> redDetail = redDetailService.selectDetails(rid);
         return ResultUtil.result(ResultEnum.SUCCESS, redDetail);
 
