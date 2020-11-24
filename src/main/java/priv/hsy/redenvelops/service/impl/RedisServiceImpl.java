@@ -28,9 +28,8 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public String redRedisIndex(int rid, int count, double totalMoney) {
         String listkey = rid + "redMoneylist";
-        String redInfoCount = rid + "redInfoCount";
-
-        redisTemplate.opsForValue().set(redInfoCount, count);
+//        String redInfoCount = rid + "redInfoCount";
+//        redisTemplate.opsForValue().set(redInfoCount, count);
 
         while (count > 0) {
             double result = GetMoneyUtil.getRandomMoney(count, totalMoney);
@@ -38,6 +37,7 @@ public class RedisServiceImpl implements RedisService {
             totalMoney -= result;
             count--;
         }
+        redisTemplate.expire(listkey,1,TimeUnit.DAYS);
         log.info("redmoneylist = {}", listkey);
         return null;
     }

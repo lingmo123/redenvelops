@@ -2,6 +2,7 @@ package priv.hsy.redenvelops.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import priv.hsy.redenvelops.entity.User;
@@ -43,12 +44,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public String updateUserifo(int uid, double money) {
-        User user = selectById(uid);
-        double totalmoney = user.getMoney();
-        totalmoney += money;
-        user.setMoney(totalmoney);
-        updateById(user);
+    public String updateUserinfo(int uid, double money) {
+
+        UpdateWrapper updateWrapper = new UpdateWrapper();
+        updateWrapper.setSql("money = money +" + money);
+        updateWrapper.eq("uid", uid);
+        this.baseMapper.update(null, updateWrapper);
         return "更新用户余额成功！";
     }
 }

@@ -15,5 +15,5 @@ public interface UserService {
 
     int delete(Wrapper<User> wrapper);
 
-    String updateUserifo(int uid, double money);
+    String updateUserinfo(int uid, double money);
 }

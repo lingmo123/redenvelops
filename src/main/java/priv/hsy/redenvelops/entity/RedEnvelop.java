@@ -23,23 +23,23 @@ public class RedEnvelop {
     private Integer count;
     private Integer restCount;
     private Integer status;
-    private Timestamp sendTime;
     private Timestamp createTime;
+    private Timestamp sendTime;
     private Timestamp updateTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public Timestamp getSendTime() {
+        return sendTime;
+    }
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     public Timestamp getUpdateTime() {
         return updateTime;
     }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    public Timestamp getSendTime() {
-        return sendTime;
-    }
 }

@@ -33,25 +33,6 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     }
 
     /**
-     * 创建的红包详情存入数据库，并设置每个红包金额
-     *
-     * @param redEnvelop 实体类
-     * @return
-     */
-    @Override
-    public String insert(RedEnvelop redEnvelop) {
-        Timestamp time = new Timestamp(System.currentTimeMillis());
-        redEnvelop.setSendTime(time);
-        this.baseMapper.insert(redEnvelop);
-        try {
-            redisService.redRedisIndex(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalMoney());
-        } catch (Exception e) {
-            return "redis设置红包列表出错！";
-        }
-        return "success！";
-    }
-
-    /**
      * 更新正在抢的红包数据
      *
      * @param rid 红包id
@@ -59,10 +40,13 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      */
     @Override
     public boolean update(Integer rid, Double money) {
+
         RedEnvelop redEnvelop = new RedEnvelop();
+        Timestamp time = new Timestamp(System.currentTimeMillis());
         UpdateWrapper updateWrapper = new UpdateWrapper();
         updateWrapper.setSql("rest_count = rest_count - 1");
         updateWrapper.setSql("rest_money = rest_money -" + money);
+        updateWrapper.setSql("update_time = " +"'" +time+"'");
         updateWrapper.eq("rid", rid);
 
         this.baseMapper.update(redEnvelop, updateWrapper);
@@ -76,6 +60,8 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      */
     @Override
     public String updateEnvelop(RedEnvelop redEnvelop, int count, double totalMoney) {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redEnvelop.setUpdateTime(time);
         redEnvelop.setRestMoney(totalMoney);
         redEnvelop.setRestCount(count);
         redEnvelop.setTotalMoney(totalMoney);
@@ -84,11 +70,18 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return "更新成功";
     }
 
+    /**
+     * 发送红包
+     * @param rid 红包id
+     * @return
+     */
     @Override
     public String sendRed(int rid) {
         RedEnvelop redEnvelop;
         redEnvelop = selectById(rid);
         redEnvelop.setStatus(1);
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redEnvelop.setSendTime(time);
         try {
             redisService.redRedisIndex(redEnvelop.getRid(), redEnvelop.getCount(), redEnvelop.getTotalMoney());
         } catch (Exception e) {
@@ -174,12 +167,19 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      */
     @Override
     public Result<Object> setRed(RedEnvelop redEnvelop) {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        redEnvelop.setCreateTime(time);
         redEnvelop.setRestCount(redEnvelop.getCount());
         redEnvelop.setRestMoney(redEnvelop.getTotalMoney());
-        insert(redEnvelop);
+        this.baseMapper.insert(redEnvelop);
         return ResultUtil.result(ResultEnum.REDSET_SUCCESS);
     }
 
+    /**
+     * 红包抢完后更改状态
+     * @param rid
+     * @return
+     */
     @Override
     public String overRed(int rid) {
         RedEnvelop redEnvelop;
