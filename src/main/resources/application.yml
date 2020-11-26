@@ -10,10 +10,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/RedEnvelop?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
   jackson:
     time-zone: GMT+8
-  mvc:
-    static-path-pattern: /**
-  resources:
-    static-locations: /META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+
 #配置日志，查看执行的sql语句
 mybatis-plus:
   configuration:
