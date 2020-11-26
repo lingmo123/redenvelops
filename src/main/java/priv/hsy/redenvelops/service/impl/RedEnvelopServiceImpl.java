@@ -16,6 +16,7 @@ import priv.hsy.redenvelops.service.RedEnvelopService;
 import priv.hsy.redenvelops.service.RedisService;
 import priv.hsy.redenvelops.utils.ResultUtil;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
     private RedisService redisService;
 
     @Override
-    public RedEnvelop selectById(int rid) {
+    public RedEnvelop selectById(BigInteger rid) {
         return this.baseMapper.selectById(rid);
     }
 
@@ -39,7 +40,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public boolean update(Integer rid, Double money) {
+    public boolean update(BigInteger rid, Double money) {
 
         RedEnvelop redEnvelop = new RedEnvelop();
         Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -59,7 +60,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public String updateEnvelop(RedEnvelop redEnvelop, int count, double totalMoney) {
+    public String updateEnvelop(RedEnvelop redEnvelop, int count, String totalMoney) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
         redEnvelop.setUpdateTime(time);
         redEnvelop.setRestMoney(totalMoney);
@@ -76,7 +77,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public String sendRed(int rid) {
+    public String sendRed(BigInteger rid) {
         RedEnvelop redEnvelop;
         redEnvelop = selectById(rid);
         redEnvelop.setStatus(1);
@@ -87,7 +88,11 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         } catch (Exception e) {
             return "redis设置红包列表出错！";
         }
-        this.baseMapper.updateById(redEnvelop);
+        try{
+            this.baseMapper.updateById(redEnvelop);
+        }catch (Exception e) {
+            return "更新数据库失败！";
+        }
         return "发送成功";
     }
 
@@ -99,45 +104,9 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public RedEnvelopPageBean selectPage(int currentPage, int pageSize) {
+    public RedEnvelopPageBean selectPage(int currentPage, int pageSize,QueryWrapper wrapper) {
         RedEnvelopPageBean redEnvelopPageBean = new RedEnvelopPageBean();
         redEnvelopPageBean.setPage(currentPage);
-        int total = this.baseMapper.selectCount(null);
-        redEnvelopPageBean.setTotal(total);
-        int totalPage;
-        redEnvelopPageBean.setLimit(pageSize);
-        if (total % pageSize == 0) {
-            totalPage = total / pageSize;
-        } else {
-            totalPage = total / pageSize + 1;
-        }
-        redEnvelopPageBean.setTotalPage(totalPage);
-        List<Integer> pages = new ArrayList<>();
-        for (int i = 1; i < totalPage + 1; i++) {
-            pages.add(i);
-        }
-        redEnvelopPageBean.setPages(pages);
-        //page是当前页，limit是每页多少数据
-        Page<RedEnvelop> page1 = new Page<>(currentPage, pageSize);
-        List<RedEnvelop> redInfoList = this.baseMapper.selectPage(page1, null).getRecords();
-        redEnvelopPageBean.setPageRecode(redInfoList);
-
-        return redEnvelopPageBean;
-    }
-
-    /**
-     * 分页查询
-     *
-     * @param currentPage 当前页
-     * @param pageSize    每页大小
-     * @return
-     */
-    @Override
-    public RedEnvelopPageBean selectPageRedInfo(int currentPage, int pageSize) {
-        RedEnvelopPageBean redEnvelopPageBean = new RedEnvelopPageBean();
-        redEnvelopPageBean.setPage(currentPage);
-        QueryWrapper wrapper = new QueryWrapper();
-        wrapper.eq("status", 0);
         int total = this.baseMapper.selectCount(wrapper);
         redEnvelopPageBean.setTotal(total);
         int totalPage;
@@ -161,7 +130,6 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return redEnvelopPageBean;
     }
 
-
     /**
      * 将红包信息存入数据库
      */
@@ -181,7 +149,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
      * @return
      */
     @Override
-    public String overRed(int rid) {
+    public String overRed(BigInteger rid) {
         RedEnvelop redEnvelop;
         redEnvelop = selectById(rid);
         redEnvelop.setStatus(2);

@@ -4,13 +4,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.*;
 
+import java.math.BigInteger;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
     @TableId(type = IdType.AUTO)
-    private Integer uid;
+    private BigInteger uid;
     private String name;
-    private Double money;
+    private String money;
 }

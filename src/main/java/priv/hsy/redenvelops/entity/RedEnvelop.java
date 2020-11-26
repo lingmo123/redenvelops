@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 
 /**
@@ -16,10 +17,10 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class RedEnvelop {
     @TableId(type = IdType.AUTO)
-    private Integer rid;
-    private Integer sendId;
-    private Double totalMoney;
-    private Double restMoney;
+    private BigInteger rid;
+    private BigInteger sendId;
+    private String totalMoney;
+    private String restMoney;
     private Integer count;
     private Integer restCount;
     private Integer status;

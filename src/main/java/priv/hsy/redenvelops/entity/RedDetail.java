@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 
 @Getter
@@ -13,9 +14,9 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class RedDetail {
     @TableId(type = IdType.AUTO)//主键自增 数据库中需要设置主键自增
-    private Integer id;
-    private Integer rid;
-    private Integer receiveId;
+    private BigInteger id;
+    private BigInteger rid;
+    private BigInteger receiveId;
     private Double getMoney;
     private Timestamp getTime;
 

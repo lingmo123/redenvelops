@@ -9,6 +9,7 @@ import priv.hsy.redenvelops.entity.User;
 import priv.hsy.redenvelops.mapper.UserMapper;
 import priv.hsy.redenvelops.service.UserService;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Service
@@ -20,7 +21,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public User selectById(Integer id) {
+    public User selectById(BigInteger id) {
         return this.baseMapper.selectById(id);
     }
 
@@ -39,12 +40,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 用户抢到红包更新账户余额
      *
-     * @param id
+     * @param uid
      * @param money
      * @return
      */
     @Override
-    public String updateUserinfo(int uid, double money) {
+    public String updateUserinfo(BigInteger uid, double money) {
 
         UpdateWrapper updateWrapper = new UpdateWrapper();
         updateWrapper.setSql("money = money +" + money);

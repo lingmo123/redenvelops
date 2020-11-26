@@ -1,15 +1,22 @@
 package priv.hsy.redenvelops.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class GetMoneyUtil {
+
+    private static ReactiveRedisOperations<Object, Object> redisTemplate;
+
 
     public static void line_cut(int money, int people) {
         List<Double> team = new ArrayList<>();
@@ -76,24 +83,41 @@ public class GetMoneyUtil {
         return money;
     }
 
-    public static void main(String[] args) throws ParseException {
-        List<Double> list=new ArrayList<>();
+    public static void main(String[] args){
+//        List<Double> list=new ArrayList<>();
+//        int remainSize=10;
+//
+//        double remainMoney=100;
+//        while(remainSize>0){
+//                double result = getRandomMoney(remainSize, remainMoney);
+//                list.add(result);
+//                remainMoney -= result;
+//                remainSize--;
+//        }
+//        double total=0.0;
+//        for (double a:list
+//             ) {
+//            total+=a;
+//        }
+//        log.info("list={} {} ",list,total);
+////        line_cut(100,10);
+        List<String> list=new ArrayList<>();
         int remainSize=10;
 
         double remainMoney=100;
         while(remainSize>0){
-                double result = getRandomMoney(remainSize, remainMoney);
-                list.add(result);
-                remainMoney -= result;
-                remainSize--;
+            double result = getRandomMoney(remainSize, remainMoney);
+            list.add(String.valueOf(result));
+            remainMoney -= result;
+            remainSize--;
         }
-        double total=0.0;
-        for (double a:list
-             ) {
-            total+=a;
+        BigDecimal total=new BigDecimal("0");
+        for (String a:list
+        ) {
+            BigDecimal num = new BigDecimal(a);
+            total = num.add(total);
         }
-        log.info("list={} {} ",list,total);
-//        line_cut(100,10);
 
+        log.info("list={} {} ",list,total);
     }
 }

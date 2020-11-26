@@ -1,22 +1,23 @@
 package priv.hsy.redenvelops.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import priv.hsy.redenvelops.entity.*;
+
+import java.math.BigInteger;
 
 
 public interface RedEnvelopService {
-    RedEnvelop selectById(int rid);
+    RedEnvelop selectById(BigInteger rid);
 
-    boolean update(Integer rid, Double money);
+    boolean update(BigInteger rid, Double money);
 
-    String updateEnvelop(RedEnvelop redEnvelop, int count, double totalMoney);
+    String updateEnvelop(RedEnvelop redEnvelop, int count, String totalMoney);
 
-    String sendRed(int rid);
+    String sendRed(BigInteger rid);
 
-    RedEnvelopPageBean selectPage(int currentPage, int pageSize);
-
-    RedEnvelopPageBean selectPageRedInfo(int currentPage, int pageSize);
+    RedEnvelopPageBean selectPage(int currentPage, int pageSize, QueryWrapper wrapper);
 
     Result<Object> setRed(RedEnvelop redEnvelop);
 
-    String overRed(int rid);
+    String overRed(BigInteger rid);
 }

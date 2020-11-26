@@ -8,6 +8,7 @@ import priv.hsy.redenvelops.entity.RedDetail;
 import priv.hsy.redenvelops.mapper.RedDtailMapper;
 import priv.hsy.redenvelops.service.RedDetailService;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -21,20 +22,19 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
      */
     @Override
     public RedDetail selectOne(Wrapper<RedDetail> wrapper) {
-            return this.baseMapper.selectOne(wrapper);
+        return this.baseMapper.selectOne(wrapper);
     }
 
     /**
      * 更新抢红包明细
      *
-     * @param redEnvelop 实体类
-     * @param money      抢到的红包金额
-     * @param rid        所抢红包id
-     * @param id         用户id
+     * @param uid   抢红包用户id
+     * @param rid   红包id
+     * @param money 所抢到的金额
      * @return
      */
     @Override
-    public String insert(int uid, int rid, double money) {
+    public String insert(BigInteger uid, BigInteger rid, double money) {
         RedDetail redDetail = new RedDetail();
         redDetail.setRid(rid);
         redDetail.setReceiveId(uid);
@@ -45,8 +45,14 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
         return "success";
     }
 
+    /**
+     * 在数据库中查找指定红包ID的明细
+     *
+     * @param rid 红包id
+     * @return
+     */
     @Override
-    public List<RedDetail> selectDetails(int rid) {
+    public List<RedDetail> selectDetails(BigInteger rid) {
         QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
         queryWrapper
                 .eq("rid", rid);
