@@ -46,6 +46,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         Timestamp time = new Timestamp(System.currentTimeMillis());
         UpdateWrapper updateWrapper = new UpdateWrapper();
         updateWrapper.setSql("rest_count = rest_count - 1");
+        updateWrapper.setSql("rest_money = convert(rest_money+" + money+",decimal(18,2))");
         updateWrapper.setSql("rest_money = rest_money -" + money);
         updateWrapper.setSql("update_time = " +"'" +time+"'");
         updateWrapper.eq("rid", rid);

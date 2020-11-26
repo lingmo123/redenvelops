@@ -38,6 +38,20 @@ public class RedEnvelopController {
     @Autowired
     private RedisService redisService;
 
+
+    /**
+     * 分页显示所有未发送的红包详情
+     *
+     * @param pageBean 实体类
+     * @return 返回状态码和消息提示
+     */
+    @PostMapping(value = "/api/getpageallred")
+    @ApiOperation(value = "分页查询所有未发送的红包详情")
+    public Result<Object> getPageAllRed(@RequestBody RedPageBean pageBean) {
+        RedEnvelopPageBean redEnvelopPageBean = redEnvelopService.selectPage(
+                pageBean.getCurrentPage(), pageBean.getPageSize(), null);
+        return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopPageBean);
+    }
     /**
      * 分页显示所有未发送的红包详情
      *
@@ -87,6 +101,7 @@ public class RedEnvelopController {
                 pageBean.getCurrentPage(), pageBean.getPageSize(), wrapper);
         return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopPageBean);
     }
+
 
     /**
      * 创建红包接口
