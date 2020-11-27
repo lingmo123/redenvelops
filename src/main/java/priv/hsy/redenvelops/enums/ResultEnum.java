@@ -21,7 +21,7 @@ public enum ResultEnum implements BaseEnum<Integer> {
     /**
      * 余额不足
      */
-    USERMONEY_NO(3000," 你的余额不足，无法设置红包，请加班挣钱！"),
+    USERMONEY_NO(3000," 你的余额不足，无法设置红包！"),
     /**
      * 余额不足
      */
