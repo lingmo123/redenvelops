@@ -13,11 +13,13 @@ public interface RedEnvelopService {
 
     String updateEnvelop(RedEnvelop redEnvelop, int count, String totalMoney);
 
-    String sendRed(BigInteger rid);
+    Result<Object> sendRed(BigInteger rid);
 
-    RedEnvelopPageBean selectPage(int currentPage, int pageSize, QueryWrapper wrapper);
+    Result<Object> selectPage(int currentPage, int pageSize, QueryWrapper<RedEnvelop> wrapper);
 
     Result<Object> setRed(RedEnvelop redEnvelop);
+
+    Result<Object> updateRed(RedEnvelop redEnvelop);
 
     String overRed(BigInteger rid);
 }

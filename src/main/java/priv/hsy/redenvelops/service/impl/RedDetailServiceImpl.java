@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import priv.hsy.redenvelops.entity.RedDetail;
+import priv.hsy.redenvelops.entity.Result;
+import priv.hsy.redenvelops.enums.ResultEnum;
 import priv.hsy.redenvelops.mapper.RedDtailMapper;
 import priv.hsy.redenvelops.service.RedDetailService;
+import priv.hsy.redenvelops.utils.ResultUtil;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -52,10 +55,15 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
      * @return
      */
     @Override
-    public List<RedDetail> selectDetails(BigInteger rid) {
+    public Result<Object> selectDetails(BigInteger rid) {
         QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
         queryWrapper
                 .eq("rid", rid);
-        return this.baseMapper.selectList(queryWrapper);
+        try {
+            List<RedDetail> redDetails = this.baseMapper.selectList(queryWrapper);
+            return ResultUtil.result(ResultEnum.SUCCESS, redDetails);
+        }catch (Exception e){
+            return ResultUtil.result(ResultEnum.FAIL);
+        }
     }
 }

@@ -44,7 +44,7 @@ public class RedisServiceImpl implements RedisService {
         while (count > 0) {
             double result = GetMoneyUtil.getRandomMoney(count, Double.parseDouble(totalMoney));
             redisTemplate.opsForList().rightPush(redMoneyList, result);
-            totalMoney= ArithmeticUtils.sub(totalMoney,String.valueOf(result)).toString();
+            totalMoney = ArithmeticUtils.sub(totalMoney, String.valueOf(result)).toString();
             count--;
         }
         redisTemplate.expire(redMoneyList, 1, TimeUnit.DAYS);
@@ -63,7 +63,6 @@ public class RedisServiceImpl implements RedisService {
             if (Boolean.TRUE.equals(lock)) {
                 break;
             }
-//            return ResultUtil.result(ResultEnum.FAIL, "lock");
         }
         try {
             if (Boolean.FALSE.equals(redisTemplate.hasKey(redStatus))) {
@@ -89,11 +88,10 @@ public class RedisServiceImpl implements RedisService {
                     return ResultUtil.result(ResultEnum.USERGET_NO);
                 }
             } else {
-                return ResultUtil.result(ResultEnum.FAIL, "红包已抢完！");
-
+                return ResultUtil.result(ResultEnum.REDCOUNT_NO);
             }
         } catch (Exception e) {
-            return ResultUtil.result(ResultEnum.FAIL, "catch");
+            return ResultUtil.result(ResultEnum.FAIL );
         } finally {
             redisTemplate.delete("lock");
         }
@@ -102,34 +100,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Result<Object> redRedisGetNoUid(String key, String redInfoCount, String redInfoMoney) {
-        Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", "first", 2, TimeUnit.SECONDS);
-        if (Boolean.FALSE.equals(lock)) {
-            return ResultUtil.result(ResultEnum.FAIL, "lock");
-        }
-        try {
-            Double restMoney = (double) redisTemplate.opsForValue().get(redInfoMoney);
-            Integer restSize = (int) redisTemplate.opsForValue().get(redInfoCount);
-
-            log.info("restMoney = {}", restMoney);
-            log.info("restSize = {}", restSize);
-            if (restSize != null && restSize > 0) {
-                redisTemplate.opsForValue().decrement(redInfoCount);
-                Double money = (Double) redisTemplate.boundListOps(key).rightPop();
-                if (money == null) {
-                    return ResultUtil.result(ResultEnum.FAIL, "monry == null");
-                }
-                restMoney -= money;
-                redisTemplate.opsForValue().set(redInfoMoney, restMoney);
-                return ResultUtil.result(ResultEnum.REDGET_SUCCESS);
-            } else {
-                return ResultUtil.result(ResultEnum.REDCOUNT_NO);
-            }
-        } catch (Exception e) {
-            return ResultUtil.result(ResultEnum.FAIL, "catch");
-        } finally {
-            redisTemplate.delete("lock");
-        }
+        return ResultUtil.result(ResultEnum.SUCCESS);
     }
-
 
 }
