@@ -3,6 +3,8 @@ package priv.hsy.redenvelops.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -13,15 +15,11 @@ import priv.hsy.redenvelops.service.*;
 
 import java.math.BigInteger;
 
+@Api
 @RestController
 @Slf4j
-@Api(tags = "红包管理接口模块")
 public class RedEnvelopController {
 
-    /**
-     * 红包最小值
-     */
-    private static final Double MIN = 0.01;
     @Autowired
     private RedEnvelopService redEnvelopService;
     @Autowired
@@ -36,8 +34,8 @@ public class RedEnvelopController {
      * @param pageBean 实体类
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("分页查询所有的红包详情")
     @PostMapping(value = "/api/getpageallred")
-    @ApiOperation(value = "分页查询所有的红包详情")
     public Result<Object> getPageAllRed(@Validated @RequestBody RedPageDto pageBean) {
 
         return redEnvelopService.selectPage(
@@ -50,8 +48,8 @@ public class RedEnvelopController {
      * @param pageBean 实体类
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("分页查询所有正在抢和抢完的红包信息")
     @PostMapping(value = "/api/getpageredenvelop")
-    @ApiOperation(value = "分页查询所有正在抢和抢完的红包信息")
     public Result<Object> getPageRedInfo(@RequestBody RedPageDto pageBean) {
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
         wrapper.eq("status", 1).or().eq("status", 2);
@@ -61,6 +59,7 @@ public class RedEnvelopController {
 
 
     //    @Override
+    @ApiOperation("@Override")
     @PostMapping(value = "/api/setred")
     public Result<Object> setRed(@Validated @RequestBody RedEnvelopDto redEnvelopDto) {
             RedEnvelop redEnvelop = new RedEnvelop();
@@ -78,8 +77,8 @@ public class RedEnvelopController {
      * @return 返回状态码和消息提示
      * @data RedEnvelopDto 实体类
      */
+    @ApiOperation("更新已设置的红包")
     @PostMapping(value = "/api/updatered")
-    @ApiOperation(value = "更新已设置的红包")
     public Result<Object> updateRed(@Validated @RequestBody RedEnvelopDto redEnvelopDto) {
             RedEnvelop redEnvelop = new RedEnvelop();
             redEnvelop.setTotalMoney(redEnvelopDto.getTotalMoney());
@@ -95,8 +94,8 @@ public class RedEnvelopController {
      * @param rid 红包id
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("发送红包")
     @PostMapping(value = "/api/sendred")
-    @ApiOperation(value = "发送红包")
     public Result<Object> sendRed(@ApiParam(value = "红包id") @RequestParam(value = "rid", required = true) BigInteger rid) {
         return redEnvelopService.sendRed(rid);
     }
@@ -106,8 +105,8 @@ public class RedEnvelopController {
      *
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("抢红包")
     @PostMapping(value = "/api/getred")
-    @ApiOperation(value = "抢红包")
     public Result<Object> getRed(@RequestBody RedUserDto redUserDto) {
         return redisService.redGet(redUserDto.getRid(), redUserDto.getUid());
     }
@@ -118,7 +117,7 @@ public class RedEnvelopController {
      * @param rid 红包id
      * @return 返回状态码和消息提示
      */
-    @ApiOperation(value = "无id抢红包")
+    @ApiOperation("无id抢红包")
     @PostMapping(value = "/api/getrednouid")
     public Result<Object> test(@ApiParam(value = "红包id") @RequestParam("rid") BigInteger rid) {
         String key = rid + "redMoneyList";
@@ -133,8 +132,8 @@ public class RedEnvelopController {
      * @param rid 红包id
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("获得红包明细")
     @PostMapping(value = "/api/getreddetails")
-    @ApiOperation(value = "获得红包明细")
     public Result<Object> getRedDetails(@ApiParam(value = "红包id") @RequestParam("rid") BigInteger rid) {
         return redDetailService.selectDetails(rid);
     }
@@ -145,8 +144,8 @@ public class RedEnvelopController {
      * @param redPageDto 实体类
      * @return 返回状态码和消息提示
      */
+    @ApiOperation("根据红包id查询红包")
     @PostMapping(value = "/api/queryrid")
-    @ApiOperation(value = "根据红包id查询红包")
     public Result<Object> queryId(@RequestBody RedPageDto redPageDto) {
 
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
@@ -161,8 +160,8 @@ public class RedEnvelopController {
      * @param uid
      * @return
      */
+    @ApiOperation("用户查看自己抢到的红包详情")
     @PostMapping(value = "/api/user/reddetails")
-    @ApiOperation(value = "用户查看自己抢到的红包详情")
 
     public Result<Object> userRedDetails(@RequestParam("uid") BigInteger uid) {
 

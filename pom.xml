@@ -11,7 +11,7 @@
     <groupId>priv.hsy</groupId>
     <artifactId>redenvelops</artifactId>
     <version>1.0.1</version>
-    <name>redenvelops</name>
+    <name>RedEnvelops</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>

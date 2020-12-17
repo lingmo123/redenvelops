@@ -101,23 +101,6 @@ public class GetMoneyUtil {
 //        }
 //        log.info("list={} {} ",list,total);
 ////        line_cut(100,10);
-        List<String> list=new ArrayList<>();
-        int remainSize=10;
-
-        double remainMoney=100;
-        while(remainSize>0){
-            double result = getRandomMoney(remainSize, remainMoney);
-            list.add(String.valueOf(result));
-            remainMoney -= result;
-            remainSize--;
-        }
-        BigDecimal total=new BigDecimal("0");
-        for (String a:list
-        ) {
-            BigDecimal num = new BigDecimal(a);
-            total = num.add(total);
-        }
-
-        log.info("list={} {} ",list,total);
+//        redisTemplate.opsForList().delete();
     }
 }
