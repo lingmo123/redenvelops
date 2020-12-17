@@ -39,7 +39,9 @@ public class ResultUtil {
                 .data(data)
                 .build();
     }
-
+    public static <T> Result<T> result(Integer code, String message, T data) {
+        return Result.<T>builder().code(code).message(message).data(data).build();
+    }
     public static <T> boolean succeeded(Result<T> result) {
         return Objects.nonNull(result) && ResultEnum.SUCCESS.getValue().equals(result.getCode());
     }

@@ -15,27 +15,19 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 
+/**
+*
+* @author hsy
+* @date 2020/12/16 9:44
+*/
 @Service
 public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail> implements RedDetailService {
-    /**
-     * 查询数据库中此id是否抢过红包
-     *
-     * @param wrapper 条件语句
-     * @return 查询结果
-     */
+
     @Override
     public RedDetail selectOne(Wrapper<RedDetail> wrapper) {
         return this.baseMapper.selectOne(wrapper);
     }
 
-    /**
-     * 更新抢红包明细
-     *
-     * @param uid   抢红包用户id
-     * @param rid   红包id
-     * @param money 所抢到的金额
-     * @return
-     */
     @Override
     public String insert(BigInteger uid, BigInteger rid, double money) {
         RedDetail redDetail = new RedDetail();
@@ -48,12 +40,6 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
         return "success";
     }
 
-    /**
-     * 在数据库中查找指定红包ID的明细
-     *
-     * @param rid 红包id
-     * @return
-     */
     @Override
     public Result<Object> selectDetails(BigInteger rid) {
         QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
@@ -62,8 +48,22 @@ public class RedDetailServiceImpl extends ServiceImpl<RedDtailMapper, RedDetail>
         try {
             List<RedDetail> redDetails = this.baseMapper.selectList(queryWrapper);
             return ResultUtil.result(ResultEnum.SUCCESS, redDetails);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResultUtil.result(ResultEnum.FAIL);
         }
     }
+
+    @Override
+    public Result<Object> userRedDetails(BigInteger uid) {
+        QueryWrapper<RedDetail> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq("receive_id", uid);
+        List<RedDetail> detailList = this.baseMapper.selectList(queryWrapper);
+        if (detailList == null) {
+            return ResultUtil.result(ResultEnum.RED_DETAIL_FAIL);
+        }
+        return ResultUtil.result(ResultEnum.SUCCESS, detailList);
+    }
+
+
 }

@@ -27,6 +27,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public boolean updateById(User user) {
+
         this.baseMapper.updateById(user);
         return true;
     }
@@ -37,13 +38,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return 0;
     }
 
-    /**
-     * 用户抢到红包更新账户余额
-     *
-     * @param uid
-     * @param money
-     * @return
-     */
     @Override
     public String updateUserinfo(BigInteger uid, double money) {
 

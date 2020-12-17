@@ -1,4 +1,4 @@
-package priv.hsy.redenvelops.entity;
+package priv.hsy.redenvelops.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +12,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RedEnvelopPageBean<T> implements Serializable {
+public class RedEnvelopPageDto<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     //当前页数
     private Integer page;
     //每页显示数

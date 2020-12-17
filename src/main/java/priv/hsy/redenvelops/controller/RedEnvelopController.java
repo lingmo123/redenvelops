@@ -5,18 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import priv.hsy.redenvelops.api.dto.*;
 import priv.hsy.redenvelops.entity.*;
-import priv.hsy.redenvelops.enums.ResultEnum;
 import priv.hsy.redenvelops.service.*;
-import priv.hsy.redenvelops.utils.ArithmeticUtils;
-import priv.hsy.redenvelops.utils.ResultUtil;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -27,10 +22,6 @@ public class RedEnvelopController {
      * 红包最小值
      */
     private static final Double MIN = 0.01;
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-    @Autowired
-    private UserService userService;
     @Autowired
     private RedEnvelopService redEnvelopService;
     @Autowired
@@ -47,7 +38,7 @@ public class RedEnvelopController {
      */
     @PostMapping(value = "/api/getpageallred")
     @ApiOperation(value = "分页查询所有的红包详情")
-    public Result<Object> getPageAllRed(@RequestBody RedPageBean pageBean) {
+    public Result<Object> getPageAllRed(@Validated @RequestBody RedPageDto pageBean) {
 
         return redEnvelopService.selectPage(
                 pageBean.getCurrentPage(), pageBean.getPageSize(), null);
@@ -61,53 +52,40 @@ public class RedEnvelopController {
      */
     @PostMapping(value = "/api/getpageredenvelop")
     @ApiOperation(value = "分页查询所有正在抢和抢完的红包信息")
-    public Result<Object> getPageRedInfo(@RequestBody RedPageBean pageBean) {
-
+    public Result<Object> getPageRedInfo(@RequestBody RedPageDto pageBean) {
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
         wrapper.eq("status", 1).or().eq("status", 2);
         return redEnvelopService.selectPage(
                 pageBean.getCurrentPage(), pageBean.getPageSize(), wrapper);
     }
 
-    /**
-     * 创建红包接口
-     *
-     * @param redEnvelop 获取前端form表信息
-     * @return 返回状态码和消息提示
-     */
+
+    //    @Override
     @PostMapping(value = "/api/setred")
-    @ApiOperation(value = "创建红包")
-    public Result<Object> setRed(@RequestBody RedEnvelop redEnvelop) {
-        //红包金额下限
-        if (Double.parseDouble(redEnvelop.getTotalMoney()) < MIN) {
-            return ResultUtil.result(ResultEnum.REDMONEY_MIN);
-            //红包数量下限
-        } else if (redEnvelop.getCount() < 1) {
-            return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
-        }  else {//发红包用户余额更新
+    public Result<Object> setRed(@Validated @RequestBody RedEnvelopDto redEnvelopDto) {
+            RedEnvelop redEnvelop = new RedEnvelop();
+            redEnvelop.setTotalMoney(redEnvelopDto.getTotalMoney());
+            redEnvelop.setCount(redEnvelopDto.getCount());
+            redEnvelop.setSendId(redEnvelopDto.getSendId());
             return redEnvelopService.setRed(redEnvelop);
-        }
+
     }
+
 
     /**
      * 更新已设置的红包
      *
-     * @param envelop 实体类
      * @return 返回状态码和消息提示
+     * @data RedEnvelopDto 实体类
      */
     @PostMapping(value = "/api/updatered")
     @ApiOperation(value = "更新已设置的红包")
-    public Result<Object> updateRed(@RequestBody RedEnvelop envelop) {
-        //红包金额下限
-        if (Double.parseDouble(envelop.getTotalMoney()) < MIN) {
-            return ResultUtil.result(ResultEnum.REDMONEY_MIN);
-            //红包数量下限
-        } else if (envelop.getCount() < 1) {
-            return ResultUtil.result(ResultEnum.REDCOUNT_MIN);
-            //用户余额是否不足
-        } else {
-            return redEnvelopService.updateRed(envelop);
-        }
+    public Result<Object> updateRed(@Validated @RequestBody RedEnvelopDto redEnvelopDto) {
+            RedEnvelop redEnvelop = new RedEnvelop();
+            redEnvelop.setTotalMoney(redEnvelopDto.getTotalMoney());
+            redEnvelop.setCount(redEnvelopDto.getCount());
+            redEnvelop.setSendId(redEnvelopDto.getSendId());
+            return redEnvelopService.updateRed(redEnvelop);
 
     }
 
@@ -119,22 +97,19 @@ public class RedEnvelopController {
      */
     @PostMapping(value = "/api/sendred")
     @ApiOperation(value = "发送红包")
-    public Result<Object> sendRed(@ApiParam(value = "红包id") @RequestParam("rid") BigInteger rid) {
+    public Result<Object> sendRed(@ApiParam(value = "红包id") @RequestParam(value = "rid", required = true) BigInteger rid) {
         return redEnvelopService.sendRed(rid);
     }
 
     /**
      * 抢红包接口
      *
-     * @param rid 获取前端红包id
-     * @param uid 获取前端抢红包用户id
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/getred")
     @ApiOperation(value = "抢红包")
-    public Result<Object> getRed(@ApiParam(value = "红包id") @RequestParam("rid") BigInteger rid,
-                                 @ApiParam(value = "用户id") @RequestParam("uid") BigInteger uid) {
-        return redisService.redGet(rid, uid);
+    public Result<Object> getRed(@RequestBody RedUserDto redUserDto) {
+        return redisService.redGet(redUserDto.getRid(), redUserDto.getUid());
     }
 
     /**
@@ -159,27 +134,52 @@ public class RedEnvelopController {
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/getreddetails")
-    @ApiOperation(value = "添加红包明细")
+    @ApiOperation(value = "获得红包明细")
     public Result<Object> getRedDetails(@ApiParam(value = "红包id") @RequestParam("rid") BigInteger rid) {
-            return redDetailService.selectDetails(rid);
+        return redDetailService.selectDetails(rid);
     }
 
     /**
-     * 分页显示所有未发送的红包详情
+     * 根据红包id查询红包
      *
-     * @param pageBean 实体类
+     * @param redPageDto 实体类
      * @return 返回状态码和消息提示
      */
     @PostMapping(value = "/api/queryrid")
-    @ApiOperation(value = "根据红包id查询")
-    public Result<Object> queryId(@RequestBody RedPageBean pageBean) {
+    @ApiOperation(value = "根据红包id查询红包")
+    public Result<Object> queryId(@RequestBody RedPageDto redPageDto) {
 
         QueryWrapper<RedEnvelop> wrapper = new QueryWrapper<>();
-        wrapper.eq("rid", pageBean.getRid());
+        wrapper.eq("rid", redPageDto.getRid());
         return redEnvelopService.selectPage(
-                pageBean.getCurrentPage(), pageBean.getPageSize(), wrapper);
+                redPageDto.getCurrentPage(), redPageDto.getPageSize(), wrapper);
     }
 
+    /**
+     * 用户查看自己抢到的红包详情
+     *
+     * @param uid
+     * @return
+     */
+    @PostMapping(value = "/api/user/reddetails")
+    @ApiOperation(value = "用户查看自己抢到的红包详情")
+
+    public Result<Object> userRedDetails(@RequestParam("uid") BigInteger uid) {
+
+        return redDetailService.userRedDetails(uid);
+    }
+
+    /**
+     * 所有的红包详情
+     * @return 返回状态码和消息提示
+     */
+    @GetMapping(value = "/api/allredinfo")
+    @ApiOperation(value = "分页查询所有的红包详情")
+    public Result<Object> getAllRedInfo() {
+        redEnvelopService.test();
+        return null;
+//        return redEnvelopService.selectAllRed();
+    }
 
 }
 

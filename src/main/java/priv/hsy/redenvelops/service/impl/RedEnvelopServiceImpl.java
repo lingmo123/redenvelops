@@ -7,8 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import priv.hsy.redenvelops.entity.RedEnvelop;
-import priv.hsy.redenvelops.entity.RedEnvelopPageBean;
+import priv.hsy.redenvelops.api.dto.*;
 import priv.hsy.redenvelops.entity.Result;
 import priv.hsy.redenvelops.entity.User;
 import priv.hsy.redenvelops.enums.ResultEnum;
@@ -39,12 +40,6 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return this.baseMapper.selectById(rid);
     }
 
-    /**
-     * 更新正在抢的红包数据
-     *
-     * @param rid 红包id
-     * @return
-     */
     @Override
     public boolean update(BigInteger rid, Double money) {
 
@@ -61,14 +56,6 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return true;
     }
 
-    /**
-     * 更新编辑的红包数据至数据库
-     *
-     * @param redEnvelop 红包实体类
-     * @param count      红包数量
-     * @param totalMoney 红包金额
-     * @return
-     */
     @Override
     public String updateEnvelop(RedEnvelop redEnvelop, int count, String totalMoney) {
         Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -81,12 +68,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return "更新成功";
     }
 
-    /**
-     * 发送红包
-     *
-     * @param rid 红包id
-     * @return
-     */
+    @Transactional( rollbackFor = Exception.class)
     @Override
     public Result<Object> sendRed(BigInteger rid) {
         RedEnvelop redEnvelop;
@@ -109,50 +91,38 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         return ResultUtil.result(ResultEnum.SUCCESS, "发送成功！！");
     }
 
-    /**
-     * 分页查询
-     *
-     * @param currentPage 当前页
-     * @param pageSize    每页大小
-     * @return
-     */
     @Override
     public Result<Object> selectPage(int currentPage, int pageSize, QueryWrapper<RedEnvelop> wrapper) {
-        RedEnvelopPageBean redEnvelopPageBean = new RedEnvelopPageBean();
-        redEnvelopPageBean.setPage(currentPage);
+        RedEnvelopPageDto redEnvelopPageDto = new RedEnvelopPageDto();
+        redEnvelopPageDto.setPage(currentPage);
         int total = this.baseMapper.selectCount(wrapper);
-        redEnvelopPageBean.setTotal(total);
+        redEnvelopPageDto.setTotal(total);
         int totalPage;
-        redEnvelopPageBean.setLimit(pageSize);
+        redEnvelopPageDto.setLimit(pageSize);
         if (total % pageSize == 0) {
             totalPage = total / pageSize;
         } else {
             totalPage = total / pageSize + 1;
         }
-        redEnvelopPageBean.setTotalPage(totalPage);
+        redEnvelopPageDto.setTotalPage(totalPage);
         List<Integer> pages = new ArrayList<>();
         for (int i = 1; i < totalPage + 1; i++) {
             pages.add(i);
         }
-        redEnvelopPageBean.setPages(pages);
+        redEnvelopPageDto.setPages(pages);
         //page是当前页，limit是每页多少数据
         Page<RedEnvelop> page1 = new Page<>(currentPage, pageSize);
         try {
             List<RedEnvelop> redInfoList = this.baseMapper.selectPage(page1, wrapper).getRecords();
-            redEnvelopPageBean.setPageRecode(redInfoList);
-            return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopPageBean);
+            redEnvelopPageDto.setPageRecode(redInfoList);
+            return ResultUtil.result(ResultEnum.SUCCESS, redEnvelopPageDto);
         } catch (Exception e) {
             log.info("error:{}", e);
             return ResultUtil.result(ResultEnum.FAIL, "获取列表失败");
         }
     }
 
-    /**
-     * 创建红包并插入到数据库
-     *
-     * @param redEnvelop 红包实体类
-     * @return
-     */
+    @Transactional( rollbackFor = Exception.class)
     @Override
     public Result<Object> setRed(RedEnvelop redEnvelop) {
         User user = userService.selectById(redEnvelop.getSendId());
@@ -160,27 +130,22 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         String totalMoney = redEnvelop.getTotalMoney();
         //用户余额是否充足
         if (userMoney.compareTo(totalMoney) < 0) {
-            return ResultUtil.result(ResultEnum.USERMONEY_NO);
+            return ResultUtil.result(ResultEnum.USER_MONEY_NO);
         } else {
-            BigDecimal restMoney = ArithmeticUtils.sub(userMoney, totalMoney);
-            user.setMoney(restMoney.toString());
-            userService.updateById(user);
-
             Timestamp time = new Timestamp(System.currentTimeMillis());
             redEnvelop.setCreateTime(time);
             redEnvelop.setRestCount(redEnvelop.getCount());
             redEnvelop.setRestMoney(redEnvelop.getTotalMoney());
             this.baseMapper.insert(redEnvelop);
-            return ResultUtil.result(ResultEnum.REDSET_SUCCESS);
+
+            BigDecimal restMoney = ArithmeticUtils.sub(userMoney, totalMoney);
+            user.setMoney(restMoney.toString());
+            userService.updateById(user);
+            return ResultUtil.result(ResultEnum.RED_SET_SUCCESS);
         }
     }
 
-    /**
-     * 编辑红包并更新数据库
-     *
-     * @param envelop 红包实体类
-     * @return
-     */
+    @Transactional( rollbackFor = Exception.class)
     @Override
     public Result<Object> updateRed(RedEnvelop envelop) {
         RedEnvelop redEnvelop = selectById(envelop.getRid());
@@ -190,7 +155,7 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         String totalMoneyNow = envelop.getTotalMoney();
 
         if (Double.parseDouble(totalMoneyNow) > Double.parseDouble(totalMoney) + Double.parseDouble(userMoney)) {
-            return ResultUtil.result(ResultEnum.USERMONEY_NO);
+            return ResultUtil.result(ResultEnum.USER_MONEY_NO);
         } else {
             //红包信息更新
             updateEnvelop(redEnvelop, envelop.getCount(), totalMoneyNow);
@@ -205,12 +170,6 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
 
     }
 
-    /**
-     * 红包抢完后更改红包状态为抢完
-     *
-     * @param rid 红包id
-     * @return
-     */
     @Override
     public String overRed(BigInteger rid) {
         RedEnvelop redEnvelop;
@@ -218,6 +177,69 @@ public class RedEnvelopServiceImpl extends ServiceImpl<RedEnvelopMapper, RedEnve
         redEnvelop.setStatus(2);
         this.baseMapper.updateById(redEnvelop);
         return "红包已经抢完";
+    }
+
+    @Override
+    public Result<Object> selectAllRed() {
+        RedEnvelopDetailsDto dto = new RedEnvelopDetailsDto();
+        List<RedEnvelop> list;
+        list = this.baseMapper.selectList(null);
+        if (list == null) {
+            return ResultUtil.result(ResultEnum.DATA_SELECT_NULL);
+        }
+        try{
+            int redNotCount = 0;
+            int redSnatchCount = 0;
+            int redOverCount = 0;
+            String totalMoney = "0";
+            BigDecimal result;
+            String snatchMoney = "0";
+            BigDecimal result1;
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).getStatus() == 0) {
+                    redNotCount++;
+                }
+                if (list.get(i).getStatus() == 1) {
+                    redSnatchCount++;
+                }
+                if (list.get(i).getStatus() == 2) {
+                    redOverCount++;
+                }
+                result = ArithmeticUtils.add(totalMoney, list.get(i).getTotalMoney());
+                result1 = ArithmeticUtils.add(snatchMoney, list.get(i).getRestMoney());
+                totalMoney = result.toString();
+                snatchMoney = result1.toString();
+
+            }
+
+            dto.setTotalRedCount(list.size());
+            dto.setRedNotCount(redNotCount);
+            dto.setRedSnatchCount(redSnatchCount);
+            dto.setRedOverCount(redOverCount);
+            dto.setTotalMoney(totalMoney);
+            dto.setSnatchMoney(snatchMoney);
+        }catch (NullPointerException e){
+            return ResultUtil.result(ResultEnum.FAIL);
+
+        }
+        return ResultUtil.result(ResultEnum.SUCCESS, dto);
+    }
+    @Override
+    @Transactional( rollbackFor = Exception.class)
+    public String test() {
+        RedEnvelop redEnvelop = new RedEnvelop();
+        UpdateWrapper<RedEnvelop> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.setSql("rest_money = rest_money -" + 10);
+        updateWrapper.eq("rid", 470);
+        this.baseMapper.update(redEnvelop,updateWrapper);
+        int i=10;
+        i=i/0;
+        UpdateWrapper<RedEnvelop> updateWrapper1 = new UpdateWrapper<>();
+        updateWrapper1.setSql("rest_money = rest_money +" + 5);
+        updateWrapper1.eq("rid", 470);
+        this.baseMapper.update(redEnvelop,updateWrapper1);
+
+        return null;
     }
 
 }
