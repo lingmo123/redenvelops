@@ -9,8 +9,8 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>priv.hsy</groupId>
-    <artifactId>renenvelops</artifactId>
-    <version>1.0.0</version>
+    <artifactId>redenvelops</artifactId>
+    <version>1.0.1</version>
     <name>redenvelops</name>
     <description>Demo project for Spring Boot</description>
 
@@ -18,8 +18,9 @@
         <java.version>1.8</java.version>
         <spirng-boot.version>2.3.4.RELEASE</spirng-boot.version>
         <mybatis-plus.version>3.1.2</mybatis-plus.version>
-        <springfox-swagger2.version>3.0.0</springfox-swagger2.version>
-
+        <springfox-swagger2.version>2.7.0</springfox-swagger2.version>
+        <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
+        <knife4j-spring-ui.version>3.0.2</knife4j-spring-ui.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +37,25 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- swagger2 -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox-swagger2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox-swagger-ui.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-ui</artifactId>
+                <version>${knife4j-spring-ui.version}</version>
             </dependency>
 
         </dependencies>
@@ -66,7 +86,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
         <dependency>
@@ -78,19 +98,16 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-            <version>2.7.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.7.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-ui</artifactId>
-            <version>3.0.2</version>
         </dependency>
 
         <dependency>
